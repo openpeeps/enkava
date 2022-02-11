@@ -14,7 +14,7 @@
 - [x] Intuitive & Easy to Learn
 - [ ] Generate rules by `JSON` sample | Say what you say ability
 - [x] Extension as `.parrot`
-- [x] [Parrot Syntax for Sublime Text 4](#sublime-syntax)
+- [x] [Parrot Syntax for Sublime Text 4](#parrot-syntax-for-your-code-editor)
 - [x] Open Source | `MIT` License
 
 ## Installing
