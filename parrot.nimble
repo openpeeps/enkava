@@ -5,7 +5,7 @@ author        = "George Lemon"
 description   = "👌 JSON Content Rules Validator 🦜 It says what you say, if you say so"
 license       = "MIT"
 srcDir        = "src"
-bin           = @["watchout"]
+bin           = @["parrot"]
 binDir        = "bin"
 
 # Dependencies
