@@ -4,6 +4,10 @@
     🦜 It says what you say, if you say so (WIP)
 </p>
 
+<p align="center">
+    <img width="700px" alt="Parrot Language" src="https://raw.githubusercontent.com/openpeep/parrot/main/.github/sample.png">
+</p>
+
 ## 😍 Key Features
 - [x] Lightweight & Multi-threading
 - [x] Parrot as a `Language` or simple `seq[string]`
@@ -48,13 +52,8 @@ if p.hasErrors:
 
 ```
 
-Of course, `seq[string]` is no more related when talking about handling big documents with complex rules.
-
+Of course, `seq[string]` is no more related when we talk about handling big documents with complex rules.<br>
 Now, let's see the real power of **Parrot Language**.
-
-<p align="center">
-    <img width="700px" alt="Parrot Language" src="https://raw.githubusercontent.com/openpeep/parrot/main/.github/sample.png">
-</p>
 
 <details>
     <summary>Show parrot text code</summary>
