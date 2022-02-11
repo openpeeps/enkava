@@ -1,19 +1,82 @@
 <p align="center">
     <img src="https://raw.githubusercontent.com/openpeep/parrot/main/.github/parrot-logo.png" width="170px"><br>
-    Fast, small, language agnostic 👌 JSON Content Rules Validator.<br>
+    Fast, Lightweight 👌 JSON Content Rules Language, Validator and Generator<br>
     🦜 It says what you say, if you say so (WIP)
 </p>
 
 ## 😍 Key Features
-- [x] Made with Love
-- [x] ...
-- [x] Open Source
+- [x] Lightweight & Multi-threading
+- [x] Parrot as a `Language` or simple `seq[string]`
+- [x] Intuitive & Easy to Learn
+- [ ] Generate rules by `JSON` sample | Say what you say ability
+- [x] Extension as `.parrot`
+- [x] Open Source | `MIT` License
 
 ## Installing
-_installation description_
+```
+nimble install parrot
+```
 
 ## Examples
-_to add working examples_
+
+Minimal example, using Parrot with rules wrapped in a `seq[string]`:
+
+```nim
+let example = %*{
+    "name": "Trippy Parrot",
+    "year": "2022",
+    "shopping": [
+        "Bananas", "Whatever Juice", "Soda", "Cat food", true
+    ]
+}
+
+var p = Parrot.init(example,
+    rules = @[
+        "name*:string",
+        "version*:int",
+        "url*:string",
+        "shopping*:array[5, string]"
+    ])
+
+# Check for errors.
+if p.hasErrors:
+    for e in p.getErrors(asString = true):
+        # Set `asString` true for full line in a single string,
+        # or remove it and returns a tuple[line, field, expectType, givenType, givenValue: string]
+        # for creating your own error message
+        echo e
+
+```
+
+Of course, `seq[string]` is no more related when talking about handling big documents with complex rules.
+
+Now, let's see the real power of **Parrot Language**.
+
+```parrot
+profile*: object
+    name*: string
+    age: int                                # optional
+    website: url                            # optional, when filled it has to be a valid URL
+    email_address*: email                   # required, validated as EMAIL
+    ip_address: ip | 127.0.0.1              # optional, with a defaullt value
+    user_currency: currency
+    bank_account: iban
+    misc: object
+        letters: alphabetical
+        numbers: numerical
+        one_digit: digit
+        hobby: uppercase
+
+# Define your rules for friends. Which is a `required` array
+# that can contain only objects, 100 maximum
+#
+# With Parrot abilities you can simply use same ^ pointer
+# followed by a previously declared object and done. 
+friends*: array[100, object]                # array of 100 objects, maximum
+    ^profile                                # Dont Repeat Yourself
+
+posts: array[object]
+```
 
 ## Roadmap
 _to add roadmap_
