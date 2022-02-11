@@ -167,7 +167,14 @@ contexts:
 
 
 ## Roadmap
-_to add roadmap_
+
+### `0.1.0`
+- [ ] Lexer, Parser, AST Node 
+- [ ] JsonNode based Validator
+- [ ] Special Validations via Parrot Filters
+- [ ] Finalize Sublime Syntax
+- [ ] Create a Syntax for VSCode (yak)
+- [ ] Talk about it on ycombinator / stackoverflow / producthunt
 
 ### ❤ Contributions
 If you like this project you can contribute to Parrot by opening new issues, fixing bugs, contribute with code, ideas and you can even [donate via PayPal address](https://www.paypal.com/donate/?hosted_button_id=RJK3ZTDWPL55C) 🥰
