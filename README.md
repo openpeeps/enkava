@@ -14,6 +14,7 @@
 - [x] Intuitive & Easy to Learn
 - [ ] Generate rules by `JSON` sample | Say what you say ability
 - [x] Extension as `.parrot`
+- [x] [Parrot Syntax for Sublime Text 4](#sublime-syntax)
 - [x] Open Source | `MIT` License
 
 ## Installing
@@ -85,6 +86,85 @@ posts: array[object]
 ```
 
 </details>
+
+## Parrot Syntax for your Code editor
+
+<details>
+    <summary>Sublime Text 4 Syntax</summary>
+
+```yaml
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/syntax.html
+file_extensions:
+  - parrot
+scope: source.parrot
+variables:
+  ident: '[A-Za-z_][A-Za-z_0-9]*'
+contexts:
+  main:
+    # Strings begin and end with quotes, and use backslashes as an escape
+    # character
+    - match: '"'
+      scope: punctuation.definition.string.begin.parrot
+      push: double_quoted_string
+
+    # Comments begin with a '//' and finish at the end of the line
+    - match: '#'
+      scope: punctuation.definition.comment.parrot
+      push: line_comment
+
+    - match: '\|'
+      scope: markup.bold keyword.operator.logical
+
+    - match: '\*'
+      scope: entity.name.tag
+
+    # Keywords are if, else for and while.
+    # Note that blackslashes don't need to be escaped within single quoted
+    # strings in YAML. When using single quoted strings, only single quotes
+    # need to be escaped: this is done by using two single quotes next to each
+    # other.
+    - match: '\b(array|bool|float|int|object|null|string)\b'
+      scope: keyword.control.parrot
+
+    # to document
+    - match: '\b(ascii|base32|base58|base64|bic|btc|currency|date|ean|etherum|hash|hex|hexcolor|hsl)\b'
+      scope: markup.italic support.constant
+
+    - match: '\b(iban|isbn|isin|macaddress|magneturi|md5|)\b'
+      scope: markup.italic support.constant
+
+    # https://nim-lang.org/docs/strutils.html
+    - match: '\b(alphabetical|numerical|digit|lowercase|uppercase|)\b'
+      scope: markup.italic support.constant
+
+    - match: '\b(url|email|phone|zipcode|ip)\b'
+      scope: markup.italic support.constant
+
+    # Numbers
+    - match: '\b(-)?[0-9.]+\b'
+      scope: constant.numeric.parrot
+
+    - match: '\b{{ident}}\b'
+      scope: punctuation.definition
+
+  double_quoted_string:
+    - meta_scope: string.quoted.double.parrot
+    - match: '\\.'
+      scope: constant.character.escape.parrot
+    - match: '"'
+      scope: punctuation.definition.string.end.parrot
+      pop: true
+
+  line_comment:
+    - meta_scope: comment.line.parrot
+    - match: $
+      pop: true
+```
+
+</details>
+
 
 ## Roadmap
 _to add roadmap_
