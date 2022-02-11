@@ -52,6 +52,13 @@ Of course, `seq[string]` is no more related when talking about handling big docu
 
 Now, let's see the real power of **Parrot Language**.
 
+<p align="center">
+    <img width="700px" alt="Parrot Language" src="https://raw.githubusercontent.com/openpeep/parrot/main/.github/sample.png">
+</p>
+
+<details>
+    <summary>Show parrot text code</summary>
+
 ```parrot
 profile*: object
     name*: string
@@ -77,6 +84,8 @@ friends*: array[100, object]                # array of 100 objects, maximum
 
 posts: array[object]
 ```
+
+</details>
 
 ## Roadmap
 _to add roadmap_
