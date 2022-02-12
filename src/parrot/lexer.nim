@@ -1,11 +1,15 @@
-import os, lexbase, streams
-from strutils import Whitespace, `%`, replace, indent, startsWith
+import std/[os, lexbase, streams]
+from std/strutils import Whitespace, `%`, replace, indent, startsWith
+from std/sequtils import toSeq
 
 type
     TokenKind* = enum
         TK_REQ              # *
         TK_SAME             # ^
+        TK_EXCLUDE          # !
         TK_OR               # |
+        TK_DOT              # .
+        TK_RANGE            # ..
         TK_LSPAREN          # [
         TK_RSPAREN          # ]
         TK_COLON            # :
@@ -70,7 +74,7 @@ template setError(l: var Lexer; err: string): untyped =
     if l.error.len == 0:
         l.error = err
  
-proc hasError[T: Lexer](self: T): bool = self.error.len > 0
+proc hasError*[T: Lexer](self: T): bool = self.error.len > 0
 
 proc existsInBuffer[T: Lexer](lex: var T, pos: int, chars:set[char]): bool = 
     lex.buf[pos] in chars
@@ -90,23 +94,6 @@ proc init*[T: typedesc[Lexer]](lex: T; fileContents: string): Lexer =
     lex.token = ""
     lex.error = ""
     return lex
-
-proc setToken*[T: Lexer](lex: var T, tokenKind: TokenKind, offset = 1) =
-    ## Set meta data for current token
-    lex.kind = tokenKind
-    lex.startPos = lex.getColNumber(lex.bufpos)
-    inc(lex.bufpos, offset)
-
-proc nextToEOL[T: Lexer](lex: var T): tuple[pos: int, token: string] =
-    # Get entire buffer starting from given position to the end of line
-    while true:
-        case lex.buf[lex.bufpos]:
-        of NewLines: return
-        of EndOfFile: return
-        else: 
-            add lex.token, lex.buf[lex.bufpos]
-            inc lex.bufpos
-    return (pos: lex.bufpos, token: lex.token)
 
 proc skipToEOL[T: Lexer](lex: var T): int =
     # Get entire buffer starting from given position to the end of line
@@ -136,6 +123,54 @@ proc skip[T: Lexer](lex: var T) =
         else:
             lex.whitespaces = wsno
             break
+
+proc setToken*[T: Lexer](lex: var T, tokenKind: TokenKind, offset = 1) =
+    ## Set meta data for current token
+    lex.kind = tokenKind
+    lex.startPos = lex.getColNumber(lex.bufpos)
+    inc(lex.bufpos, offset)
+
+proc setTokenMulti[T: Lexer](lex: var T, tokenKind: TokenKind, offset = 0, multichars = 0) =
+    # Set meta data of the current token and jump to the next one
+    skip lex
+    lex.startPos = lex.getColNumber(lex.bufpos)
+    var items = 0
+    if multichars != 0:
+        while items < multichars:
+            add lex.token, lex.buf[lex.bufpos]
+            inc lex.bufpos
+            inc items
+    else:
+        add lex.token, lex.buf[lex.bufpos]
+        inc lex.bufpos, offset
+    lex.kind = tokenKind
+
+proc nextToEOL[T: Lexer](lex: var T): tuple[pos: int, token: string] =
+    # Get entire buffer starting from given position to the end of line
+    while true:
+        case lex.buf[lex.bufpos]:
+        of NewLines: return
+        of EndOfFile: return
+        else: 
+            add lex.token, lex.buf[lex.bufpos]
+            inc lex.bufpos
+    return (pos: lex.bufpos, token: lex.token)
+
+proc next*[T: Lexer](lex: var T, tkChar: char, offset = 1): bool =
+    # Determine if the next character is as expected,
+    # without modifying the current buffer position
+    skip lex
+    return lex.buf[lex.bufpos + offset] in {tkChar}
+
+proc next*[T: Lexer](lex: var T, chars:string): bool =
+    ## Determine the next characters based on given chars string,
+    ## without modifying the current buffer position
+    var i = 1
+    var status = false
+    for c in chars.toSeq():
+        status = lex.next(c, i)
+        inc i
+    return status
  
 proc handleSpecial[T: Lexer](lex: var T): char =
     ## Procedure for for handling special escaping tokens
@@ -221,8 +256,8 @@ proc handleSequence[T: Lexer](lex: var T) =
 proc handleNumber[T: Lexer](lex: var T) =
     lex.startPos = lex.getColNumber(lex.bufpos)
     lex.token = "0"
-    while lex.buf[lex.bufpos] == '0':
-        inc lex.bufpos
+    # while lex.buf[lex.bufpos] == '0':
+    #     inc lex.bufpos
     while true:
         case lex.buf[lex.bufpos]
         of '0'..'9':
@@ -233,9 +268,9 @@ proc handleNumber[T: Lexer](lex: var T) =
         of 'a'..'z', 'A'..'Z', '_':
             lex.setError("Invalid number")
             return
-        else:
-            lex.setToken(TK_INTEGER)
-            break
+        else: break
+
+    lex.setToken(TK_INTEGER)
 
 proc handleIdent[T: Lexer](lex: var T) =
     lex.startPos = lex.getColNumber(lex.bufpos)
@@ -298,11 +333,14 @@ proc getToken*[T: Lexer](lex: var T): TokenTuple =
     of EndOfFile:
         lex.startPos = lex.getColNumber(lex.bufpos)
         lex.kind = TK_EOF
-    of '#':
-        lex.setToken(TK_COMMENT, lex.nextToEOL().pos)
+    of '#': lex.setToken(TK_COMMENT, lex.nextToEOL().pos)
     of '*': lex.setToken(TK_REQ)
+    of '.':
+        if lex.next('.'): lex.setTokenMulti(TK_RANGE, 2, 2)
+        else: lex.setToken(TK_DOT)
     of ',': lex.setToken(TK_COMMA)
     of '^': lex.setToken(TK_SAME)
+    of '!': lex.setToken(TK_EXCLUDE)
     of '[': lex.setToken(TK_LSPAREN)
     of ']': lex.setToken(TK_RSPAREN)
     of '|': lex.setToken(TK_OR)

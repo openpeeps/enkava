@@ -1,4 +1,9 @@
 from ./lexer import TokenKind
+# from std/strutils import toUpperAscii
+from std/enumutils import symbolName
+
+import std/tables
+export tables, symbolName
 
 type
     ParrotTypeValue* = enum
@@ -42,10 +47,16 @@ type
     Node* = object
         identifier*: string
         typeValue*: ParrotTypeValue
+        typeValueStr*: string
+
+    SizeRule* = object
+        min, max: int
 
     Rule* = object
         node*: Node
+        subrules*: Table[string, Rule]
         required*: bool
+        size: SizeRule
         defaultValue*: string
         meta*: tuple[col, line, wsno: int]
 
