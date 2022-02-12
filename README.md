@@ -1,6 +1,6 @@
 <p align="center">
     <img src="https://raw.githubusercontent.com/openpeep/parrot/main/.github/parrot-logo.png" width="170px"><br>
-    Fast, Lightweight 👌 JSON Content Rules Language, Validator and Generator<br>
+    State of the Art 👌 JSON Content Rules Language, Validator and Generator<br>
     🦜 It says what you say, if you say so (WIP)
 </p>
 
@@ -16,6 +16,9 @@
 - [x] Extension as `.parrot`
 - [x] [Parrot Syntax for Sublime Text 4](#parrot-syntax-for-your-code-editor)
 - [x] Open Source | `MIT` License
+
+## Why
+Because regular JSON Schema validators are slow and boring, requires writing JSON 🙄 which is boring too.
 
 ## Installing
 ```
