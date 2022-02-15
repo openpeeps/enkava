@@ -131,9 +131,13 @@ template parseIdentifier[T: Parser](p: var T, parentNode: TokenTuple, isChildNod
         p.rules.add(rule)                  # add rule to rules sequence
     p.memorize(ident.value, rule)          # store in memory
 
-proc isChild(childNode, parentNode: TokenTuple): bool =
+proc isChild[T: Parser](p: var T, childNode, parentNode: TokenTuple): bool =
     if childNode.isIdent():
         result = childNode.col > parentNode.col
+        if result == true:
+            result = (childNode.col and 1) != 1 and (parentNode.col and 1) != 1
+            if result == false:
+                p.setError("Invalid indentation. Use 2 or 4 spaces to indent your rules")
     else:
         result = false
 
@@ -144,9 +148,14 @@ proc walk[T: Parser](p: var T) =
             let parentNode = p.current
             p.parseIdentifier(parentNode)
             jump p
-            while p.current.isChild(parentNode) and not p.isEOF:
+
+            # Handle first level of child nodes
+            while p.isChild(p.current, parentNode) and not p.isEOF:
                 p.parseIdentifier(parentNode, true)
                 jump p
+
+            # Handle deeper levels of child nodes
+            echo p.current
 
         if p.current.expect(TK_SAME):
             ## When an identifier is prefixed by ^ TK_SAME,
