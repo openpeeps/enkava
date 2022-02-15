@@ -4,7 +4,7 @@ from std/sequtils import toSeq
 
 type
     TokenKind* = enum
-        TK_REQ              # *
+        TK_OPT              # *
         TK_SAME             # ^
         TK_EXCLUDE          # !
         TK_OR               # |
@@ -334,7 +334,7 @@ proc getToken*[T: Lexer](lex: var T): TokenTuple =
         lex.startPos = lex.getColNumber(lex.bufpos)
         lex.kind = TK_EOF
     of '#': lex.setToken(TK_COMMENT, lex.nextToEOL().pos)
-    of '*': lex.setToken(TK_REQ)
+    of '*': lex.setToken(TK_OPT)
     of '.':
         if lex.next('.'): lex.setTokenMulti(TK_RANGE, 2, 2)
         else: lex.setToken(TK_DOT)
