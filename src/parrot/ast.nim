@@ -7,6 +7,7 @@ export tables, symbolName
 
 type
     ParrotTypeValue* = enum
+        TypeInvalid
         TypeAscii
         TypeAlphabetical
         TypeBase32
@@ -42,7 +43,6 @@ type
         TypeObject
         TypeNull
         TypeString
-        TypeInvalid
 
     Node* = object
         identifier*: string
@@ -52,13 +52,13 @@ type
     SizeRule* = object
         min, max: int
 
-    Rule* = object
+    Rule* = ref object
         node*: Node
-        subrules*: Table[string, Rule]
+        nodes*: OrderedTable[string, Rule]
         required*: bool
         size: SizeRule
         defaultValue*: string
-        meta*: tuple[col, line, wsno: int]
+        meta*: tuple[col, line, wsno, pos: int]
 
 proc typeValueByKind*(kind: TokenKind): ParrotTypeValue =
     return case kind:
