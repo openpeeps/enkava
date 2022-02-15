@@ -132,19 +132,23 @@ template parseIdentifier[T: Parser](p: var T, parentNode: TokenTuple, isChildNod
     p.memorize(ident.value, rule)          # store in memory
 
 proc isChild(childNode, parentNode: TokenTuple): bool =
-    result = childNode.line > parentNode.line
+    if childNode.isIdent():
+        result = childNode.col > parentNode.col
+    else:
+        result = false
 
 proc walk[T: Parser](p: var T) =
     while p.hasError() == false and p.lexer.hasError() == false and not p.isEOF:
         if p.current.isIdent():
+            let prevNode = p.prev
             let parentNode = p.current
             p.parseIdentifier(parentNode)
             jump p
             while p.current.isChild(parentNode) and not p.isEOF:
                 p.parseIdentifier(parentNode, true)
                 jump p
+
         if p.current.expect(TK_SAME):
-            echo p.current
             ## When an identifier is prefixed by ^ TK_SAME,
             ## it means is a previously declared identifier
             ## used as reference for copying its children nodes
@@ -186,12 +190,10 @@ proc walk[T: Parser](p: var T) =
                     else:
                         p.setError("Unrecognized character in exclusion syntax \"$1\"" % [p.current.value])
                         break
-                
                 # if tokens.len != 0:
                     # echo p.rules[order].node.identifier
                     # p.rules[order].nodes[sameRefNode.node.identifier] = sameRefNode
-
-        jump p
+        # jump p
 
 proc parseProgram*(parrotContents: string, node: JsonNode): Parser =
     ## Parser Program initializer. Reads rules of the given Parrot file
