@@ -44,21 +44,16 @@ type
         TypeNull
         TypeString
 
-    Node* = object
-        identifier*: string
+    SizeRule* = tuple[min, max: int]
+
+    Node* = ref object
+        ident*: string
         typeValue*: ParrotTypeValue
-        typeValueStr*: string
-
-    SizeRule* = object
-        min, max: int
-
-    Rule* = ref object
-        node*: Node
-        nodes*: OrderedTable[string, Rule]
+        typeValueSymbol*: string
         required*: bool
-        size: SizeRule
+        size*: SizeRule
         defaultValue*: string
-        meta*: tuple[col, line, wsno, pos: int]
+        nodes*: OrderedTable[string, Node]
 
 proc typeValueByKind*(kind: TokenKind): ParrotTypeValue =
     return case kind:
