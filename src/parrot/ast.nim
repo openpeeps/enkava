@@ -54,6 +54,7 @@ type
         size*: SizeRule
         defaultValue*: string
         nodes*: OrderedTable[string, Node]
+        meta*: tuple[kind: TokenKind, line, col, wsno: int]
 
 proc typeValueByKind*(kind: TokenKind): ParrotTypeValue =
     return case kind:
