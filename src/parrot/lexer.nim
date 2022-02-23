@@ -74,7 +74,7 @@ template setError(l: var Lexer; err: string): untyped =
     if l.error.len == 0:
         l.error = err
  
-proc hasError*[T: Lexer](self: T): bool = self.error.len > 0
+proc hasError*[T: Lexer](lexer: T): bool {.inline.} = lexer.error.len != 0
 
 proc existsInBuffer[T: Lexer](lex: var T, pos: int, chars:set[char]): bool = 
     lex.buf[pos] in chars
