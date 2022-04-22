@@ -1,6 +1,6 @@
 <p align="center">
     <img src="https://raw.githubusercontent.com/openpeep/parrot/main/.github/parrot-logo.png" width="170px"><br>
-    State of the Art 👌 JSON Content Rules Language, Validator and Generator<br>
+    State of the Art 👌 JSON Content Rules Language, Server, Validator & Generator<br>
     🦜 It says what you say, if you say so (WIP)
 </p>
 
@@ -10,15 +10,20 @@
 
 ## 😍 Key Features
 - [x] Lightweight & Multi-threading
-- [x] Parrot as a `Language` or simple `seq[string]`
-- [x] Intuitive & Easy to Learn
-- [ ] Generate rules by `JSON` sample | Say what you say ability
+- [x] Parrot as a Language
+- [x] Command Line Interface
+- [x] Built-in REST API | Supporting `Http` & `WebSockets` (soon)
+- [x] 👍 for Validating damn-complex forms and data 🧐
+- [x] 💪 for Validating any kind of JSON-based configs
+- [x] Validate, validate, over and over... 😲
+- [ ] Generate rules by `JSON` sample | `Say what you say` ability
 - [x] Extension as `.parrot`
 - [x] [Parrot Syntax for Sublime Text 4](#parrot-syntax-for-your-code-editor)
-- [x] Open Source | `MIT` License
+- [x] Made for Unix systems
+- [x] Open Source | `GPLv3` License
 
 ## Why
-Because regular JSON Schema validators are slow and boring, requires writing JSON 🙄 which is boring too.
+1. Because regular JSON Schema validators are slow and boring, requires writing JSON 🙄 which is boring too.
 
 ## Installing
 ```
@@ -26,49 +31,16 @@ nimble install parrot
 ```
 
 ## Examples
-
-Minimal example, using Parrot with rules wrapped in a `seq[string]`:
-
-```nim
-let example = %*{
-    "name": "Trippy Parrot",
-    "year": "2022",
-    "shopping": [
-        "Bananas", "Whatever Juice", "Soda", "Cat food", true
-    ]
-}
-
-var p = Parrot.init(example,
-    rules = @[
-        "name*:string",
-        "version*:int",
-        "url*:string",
-        "shopping*:array[5, string]"
-    ])
-
-# Check for errors.
-if p.hasErrors:
-    for e in p.getErrors(asString = true):
-        # Set `asString` true for full line in a single string,
-        # or remove it and returns a tuple[line, field, expectType, givenType, givenValue: string]
-        # for creating your own error message
-        echo e
-
-```
-
-Of course, `seq[string]` is no more related when we talk about handling big documents with complex rules.<br>
-Now, let's see the real power of **Parrot Language**.
-
 <details>
-    <summary>Show parrot text code</summary>
+    <summary>Show sample Parrot Rules</summary>
 
 ```parrot
-profile*: object
-    name*: string
-    age: int                                # optional
-    website: url                            # optional, when filled it has to be a valid URL
-    email_address*: email                   # required, validated as EMAIL
-    ip_address: ip | 127.0.0.1              # optional, with a defaullt value
+profile: object
+    name: string
+    age*: int                                # optional
+    website*: url                            # optional, when filled it has to be a valid URL
+    email_address: email.                    # required, string-based filer with E-mail validation
+    ip_address*: ip | 127.0.0.1              # optional, string-based filter with IP validation
     user_currency: currency
     bank_account: iban
     misc: object
@@ -79,13 +51,19 @@ profile*: object
 
 # Define your rules for friends. Which is a `required` array
 # that can contain only objects, 100 maximum
-#
-# With Parrot abilities you can simply use same ^ pointer
-# followed by a previously declared object and done. 
-friends*: array[100, object]                # array of 100 objects, maximum
-    ^profile                                # Dont Repeat Yourself
 
-posts: array[object]
+friends: array[100, object]                # array of 100 objects, maximum
+
+    # Parrot recommends to keep it DRY (Don't Repeat Yourself)
+    #
+    # So, instead of rewriting rules, we can use `^` same reference operator
+    # which tells Parrot that `friends` array can contain only `object` rules
+    # similar to `profile` object. Pretty cool, right?
+    ^profile
+
+posts: array[object]            # simple array of (any kind) objects, no min/max
+
+# Yeah. This is a comment
 ```
 
 </details>
@@ -93,7 +71,7 @@ posts: array[object]
 ## Parrot Syntax for your Code editor
 
 <details>
-    <summary>Sublime Text 4 Syntax</summary>
+    <summary>Sublime Text 4 Syntax (WIP)</summary>
 
 ```yaml
 %YAML 1.2
@@ -172,7 +150,7 @@ contexts:
 ## Roadmap
 
 ### `0.1.0`
-- [ ] Lexer, Parser, AST Node 
+- [x] Lexer, Parser, AST Node 
 - [ ] JsonNode based Validator
 - [ ] Special Validations via Parrot Filters
 - [ ] Finalize Sublime Syntax
@@ -188,5 +166,5 @@ If you like this project you can contribute to Parrot by opening new issues, fix
 <strong>Why Nim?</strong> Performance, fast compilation and C-like freedom. We want to keep code clean, readable, concise, and close to our intention. Also a very good language to learn in 2022.
 
 ### 🎩 License
-Parrot is an Open Source Software released under `MIT` license. [Developed by Humans from OpenPeep](https://github.com/openpeep).<br>
+Parrot is an Open Source Software released under `GPLv3` license. [Made by Humans from OpenPeep](https://github.com/openpeep).<br>
 Copyright &copy; 2022 OpenPeep & Contributors &mdash; All rights reserved.
