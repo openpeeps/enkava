@@ -18,7 +18,7 @@ from std/enumutils import symbolName
 export tables, symbolName
 
 type
-    ParrotTypeValue* = enum
+    EnkavaTypeValue* = enum
         TypeInvalid
         TypeAscii
         TypeAlphabetical
@@ -61,7 +61,7 @@ type
     Node* = ref object
         ident*: string
             ## Identifier string representation
-        typeValue*: ParrotTypeValue
+        typeValue*: EnkavaTypeValue
             ## The type of the node
         symbolName*: string
             ## The symbol name representing the type of the node
@@ -79,7 +79,7 @@ type
 proc isObject*(node: Node): bool =
     result = node.typeValue == TypeObject
 
-proc typeValueByKind*(kind: TokenKind): ParrotTypeValue =
+proc typeValueByKind*(kind: TokenKind): EnkavaTypeValue =
     return case kind:
         of TK_ASCII:           TypeAscii
         of TK_ALPHABETICAL:    TypeAlphabetical

@@ -26,11 +26,11 @@ proc getCurrentDirPath*(append: varargs[string]): string =
     result = if append.len == 0: currdir else: currdir & "/" & append.join("/")
 
 proc configFileExists*(): bool =
-    ## Determine if current directory contains a ``parrot.config.yml``
+    ## Determine if current directory contains a ``enkava.config.yml``
     result = fileExists(getCurrentDirPath(configFileName))
 
 proc readConfigContents*(configPath = ""): string = 
-    ## Retrieve configuration contents from ``parrot.config.yml``
+    ## Retrieve configuration contents from ``enkava.config.yml``
     let filePath = if configPath.len == 0: getCurrentDirPath(configFileName) else: configPath 
     try:
         result = readFile(filePath)

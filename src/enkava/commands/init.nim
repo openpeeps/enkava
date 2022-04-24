@@ -32,12 +32,12 @@ app:
         quit()
 
 proc runCommand*() =
-    ## Command for initializing a new Parrot configuration
+    ## Command for initializing a new Enkava configuration
     if configFileExists():
         display("👉 `$1` already exists at current location" % [configFileName], indent=2)
         quit()
 
     display("Creating a new Enkava Configuration", indent=2)
 
-    createConfigFile("127.0.0.1", "1234", "1", "./parrot/rules", "./parrot/bson")
+    createConfigFile("127.0.0.1", "1234", "1", "./enkava/rules", "./enkava/bson")
     display("✨ Done!")

@@ -19,15 +19,15 @@ include ../core/server/routes
 import ./utils
 
 proc runCommand*(configPath: Value) =
-    ## Command for starting a Parrot HTTP server powered by Supranim.
+    ## Command for starting a Enkava HTTP server powered by Supranim.
     ##
-    ## In production mode is recommended to boot your Parrot instance(s)
-    ## by passing an absolute path that points to your specific ``parrot.config.yml``.
+    ## In production mode is recommended to boot your Enkava instance(s)
+    ## by passing an absolute path that points to your specific ``enkava.config.yml``.
     ## 
-    ## Also, you may want to boot Parrot as a daemon via
+    ## Also, you may want to boot Enkava as a daemon via
     ## ``systemd`` or a similar daemon manager.
     if not configFileExists():
-        display("👉 `$1` is missing. Run `parrot init` to generate your config." % [configFileName], indent=2)
+        display("👉 `$1` is missing. Run `enkava init` to generate your config." % [configFileName], indent=2)
         quit()
 
     let getConfigPath = if configPath.isNil(): "" else: $configPath
