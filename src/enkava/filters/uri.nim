@@ -14,7 +14,9 @@ type
         ## IANA RFC-7595 Uniform Resource Identifiers
         ## https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml
         Invalid
-
+        Android = "android"
+            ## Identifies an Android application
+            ## android://<application-id>
         Bitcoin = "bitcoin"
             ## Send money to a Bitcoin address
             ## bitcoin:<address>[?[amount=<size>][&][label=<label>][&][message=<message>]]
@@ -35,10 +37,42 @@ type
         FaceTime = "facetime"
             ## facetime://<address>|<MSISDN>|<mobile number>
             ## example: facetime://+19995551234
-
+        Feed = "feed"
+            ## web irc6://<host>[:<port>]/[<channel>[?<password>]]feed subscription
+            ## feed:<absolute_uri> or feed://<hierarchical part>
+        Ftp = "ftp"
+            ## ftp://[user[:password]@]host[:port]/url-path
+        Git = "git"
+            ## Provides a link to a GIT repository
+            ## git://github.com/user/project-name.git
+        Irc = "irc"
+            ## Connecting to an Internet Relay Chat server to join a channel
+            ## irc://<host>[:<port>]/[<channel>[?<password>]]
+        Irc6 = "irc6"
+            ## IPv6 equivalent of irc used by KVIrc
+            ## irc6://<host>[:<port>]/[<channel>[?<password>]]
+        Ircs = "ircs"
+            ## Secure equivalent of irc
+            ## ircs://<host>[:<port>]/[<channel>[?<password>]]
+        Ldaps = "ldaps"
+            ## Secure equivalent of ldap
+            ## ldaps://[<host>[:<port>]][/<dn> [?[<attributes>][?[<scope>][?[<filter>][?<extensions>]]]]]
         MongoDB = "mongodb"
             ## mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
-
+        Market = "market"
+            ## Opens Google Play
+            ## market://details?id=Package_name or market://search?q=Search_Query
+            ## market://search?q=pub:Publisher_Name
+        Message = "message"
+            ## Direct link to specific email message
+            ## message:<MESSAGE-ID>
+            ## message://<MESSAGE-ID>
+        Sftp = "sftp"
+            ## SFTP file transfers (not be to confused with FTPS (FTP/SSL))
+            ## sftp://[<user>[;fingerprint=<host-key fingerprint>]@]<host>[:<port>]/<path>/<file>
+        Ssh = "ssh"
+            ## SSH connections (like telnet:)
+            ## ssh://[<user>[;fingerprint=<host-key fingerprint>]@]<host>[:<port>] 
 converter toSchemeURI(i: string): SchemeURI =
     try:
         result = parseEnum[SchemeURI](i)
