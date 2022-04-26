@@ -15,6 +15,13 @@
 import supranim/router
 include ./pages
 
+# GET type endpoint that returns the status of your
+# Enkava instance
 Router.get("/", getParrotStatus)
-Router.post("/validate/{id}", validateRuleById)
-Router.get("/refresh", updateRulesCollection)
+
+# POST type endpoint to validate JSON contents
+# 
+# Your request must contain the following parameters
+#   slug     Which is the name of a binary JSON compiled by Enkava
+#   body     Must contain only JSON contents that must be validated 
+Router.get("/check/{slug}", validateRuleById)

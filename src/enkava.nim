@@ -13,7 +13,8 @@
 #          https://github.com/enkava
 
 import klymene
-import enkava/commands/[init, server, validator, generator]
+import enkava/commands/[init, server, validator, build]
+import enkava/core/server/memory
 from std/strutils import `%`
 
 const
@@ -39,4 +40,4 @@ let args = newCommandLine(commands, version=version, binaryName=appId)
 if   isCommand("new", args):                init.runCommand()
 elif isCommand("serve", args):              server.runCommand(args["<config>"])
 elif isCommand("check", args):              validator.runCommand(args["<json>"], args["<rules>"])
-elif isCommand("build", args):              generator.runCommand()
+elif isCommand("build", args):              build.runCommand()

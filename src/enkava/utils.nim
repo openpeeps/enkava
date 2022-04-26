@@ -12,18 +12,39 @@
 #          https://enkava.co
 #          https://github.com/enkava
 
-from std/os import getCurrentDir, fileExists
+import bson
+from std/os import getCurrentDir, fileExists, normalizePath, dirExists
 from std/strutils import `%`, join
 from klymene/cli import display
 
-export join, `%`
+export join, `%`, normalizePath, dirExists
 
 const configFileName* = "enkava.config.yml"
+
+type
+    EnkavaException* = CatchableError
+
+proc writeBson*(ekaStatements: string) =
+    ## Write current JSON AST to BSON
+    var eka = newBsonDocument()
+    eka["ast"] = ekaStatements
+    writeFile(getCurrentDir() & "/test.bson", eka.bytes)
+
+proc readBson*(ekaPath: string): string =
+    ## Read current BSON and parse to JSON
+    var eka: Bson = newBsonDocument(readFile(ekaPath))
+    result = eka["ast"]
 
 proc getCurrentDirPath*(append: varargs[string]): string =
     ## Return the current directory path appended by given strings
     let currdir = getCurrentDir()
     result = if append.len == 0: currdir else: currdir & "/" & append.join("/")
+
+proc getDirPath*(append: varargs[string]): string =
+    ## Normalize and returns the absolute path
+    var path = getCurrentDirPath(append)
+    path.normalizePath
+    result = path
 
 proc configFileExists*(): bool =
     ## Determine if current directory contains a ``enkava.config.yml``
