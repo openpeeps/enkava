@@ -13,17 +13,22 @@
 #          https://github.com/enkava
 
 import klymene/cli
-import ./utils
+import ../utils
 # from ../filters/ip import isIPv4
 
 proc createConfigFile(fields: varargs[string]) =
     let enkavaConfig = """
 app:
-  address: "$1"         # The address | 127.0.0.1
-  port: $2              # Port number | 7550
-  threads: $3           # Number of threads
-  source: "$4"          # Source path to your .eka rules
-  output: "$5"          # Source path to binary rules
+  # The address | 127.0.0.1
+  address: "$1"
+  # Port number | 7550
+  port: $2
+  # Number of threads
+  threads: $3
+  # Source path to your .eka rules
+  source: "$4"
+  # Source path to binary rules
+  output: "$5"
 """
     try:
         writeFile(getCurrentDirPath(configFileName), enkavaConfig % fields)

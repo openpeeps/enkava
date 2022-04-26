@@ -12,26 +12,15 @@
 #          https://enkava.co
 #          https://github.com/enkava
 
-import bson
 import klymene/cli
 import ../core/language/parser
 import ../core/server/memory
+from ../utils import writeBson, readBson
 
 from times import cpuTime
 from std/os import getCurrentDir
 from std/strutils import formatFloat, ffDecimal
 from klymene import Value, `$`
-
-proc writeBson(ekaStatements: string) =
-    ## Write current JSON AST to BSON
-    var eka = newBsonDocument()
-    eka["ast"] = ekaStatements
-    writeFile(getCurrentDir() & "/test.bson", eka.bytes)
-
-proc readBson*(ekaPath: string): string =
-    ## Read current BSON and parse to JSON
-    var eka: Bson = newBsonDocument(readFile(ekaPath))
-    result = eka["ast"]
 
 proc runCommand*() =
     ## Command for generating binary JSON (BSON) rules for all rules
@@ -52,7 +41,7 @@ proc runCommand*() =
     # writeBson(p.getStatements())
     # Memory.add("test", eka_path, bson_path)
 
-    echo readBson(getCurrentDir() & "/test.bson")
+    # echo readBson(getCurrentDir() & "/test.bson")
     
     let benchTime = (cpuTime() - time).formatFloat(format = ffDecimal, precision = 3)
     display("✨ Done in " & $benchTime & " seconds", indent=2, br="before")

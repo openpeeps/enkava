@@ -16,7 +16,7 @@ import klymene/cli
 from klymene import Value, `$`
 
 import ../core/language/parser
-import ../core/utils
+import ../utils
 
 proc runCommand*(input, rules: Value) =
     ## Command for validating a JSON file based on given rules

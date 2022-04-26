@@ -118,17 +118,8 @@ proc isChildOf[P: Parser, T: TokenTuple](p: var P, token: T, prevNode: Node): bo
         if result == false:
             p.setError(TypeError, "Bad indentation. Use 2 or 4 spaces to indent your rules")
             return false
-
         if p.indent == 0: # first time indentation will set the default indent size preference.
             p.indent = token.col
-
-        if prevNode.meta.col == (token.col - 2) or prevNode.meta.col == (token.col - 4):
-            result = true
-        else:
-            # ensure a strict indentation
-            # echo prevNode.meta.col # 0
-            # echo p.indent          # 4
-            # echo p.current.col     # 8
-
-            # echo prevNode.meta.level * p.indent == p.current.col
-            result = false
+        if prevNode.meta.col == (token.col - 2) or
+           prevNode.meta.col == (token.col - 4): result = true
+        else: result = false

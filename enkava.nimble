@@ -28,6 +28,7 @@ requires "nim >= 1.6.0"
 requires "toktok"
 requires "supranim"
 requires "klymene"
+requires "jsony"
 requires "bson"
 
 after build:
@@ -39,4 +40,4 @@ task dev, "Compile for development":
 
 task prod, "Compile for production":
     echo "\n✨ Compiling for prod" & "\n"
-    exec "nimble build -d:release --gc:arc --threads:on -d:ssl --opt:size -d:danger -d:inlineConfig"
+    exec "nimble build -d:release --gc:arc --threads:on --opt:speed -d:danger -d:inlineConfig"

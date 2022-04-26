@@ -14,6 +14,7 @@
 
 from std/math import splitDecimal
 from std/strutils import `%`, join
+from std/sequtils import delete
 
 import toktok
 import std/[md5, json, jsonutils]
@@ -223,7 +224,6 @@ proc getLastParent(p: var Parser): Node =
     ## Retrieve the last ``Node`` parent from ``parents`` field
     if p.parents.len != 0:
         result = p.parents[^1]
-        # p.parents.delete()
 
 proc parseExpression(p: var Parser): Node =
     ## Parse rule expression and return Node representation
@@ -257,7 +257,10 @@ proc parseExpression(p: var Parser): Node =
                 elif p.current.col < p.prevNode.meta.col or p.isEOF:
                     break
                 elif p.current.col == p.prevNode.meta.col:
-                    p.createNode(p.getLastParent(), prefixFn)
+                    if p.parents.len != 0:
+                        p.createNode(p.getLastParent(), prefixFn)
+                        p.parents.delete(p.parents.high .. p.parents.high)
+                    else: break
     result = field
 
 proc walk[T: Parser](p: var T) =
@@ -275,7 +278,7 @@ proc walk[T: Parser](p: var T) =
 proc getStatements*(p: var Parser): string =
     ## Procedure used only for debug purposing. Prints the current
     ## statements to pretty ``JSON``, indented with 2 spaces.
-    result = pretty(p.statements.toJSON, 2)
+    pretty(p.statements.toJSON, 2)
 
 proc parseProgram*(enkavaContents: string): Parser =
     ## Parser Program initializer. Reads rules of the given Enkava file
@@ -287,7 +290,7 @@ proc parseProgram*(enkavaContents: string): Parser =
     p.prev    = p.current
     p.currln  = p.current.line
     p.walk()
-    return p
+    result = p
 
 proc parseProgram*(enkavaSeq: seq[string]): Parser =
     ## Parser Program initializer. Reads rules from given seq[string]

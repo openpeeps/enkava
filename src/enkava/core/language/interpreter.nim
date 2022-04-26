@@ -99,6 +99,7 @@ proc hasInternalError*[I: Interpreter](interp: I): bool {.inline.} =
     result = interp.internal_error != nil
 
 proc getInternalError*[I: Interpreter](interp: I): InternalErrorNotification {.inline.} =
+    ## Returns an object of ``InternalErrorNotification``
     result = interp.internal_error
 
 iterator errors*[I: Interpreter](interp: I): tuple[key, message: string] =
@@ -107,7 +108,28 @@ iterator errors*[I: Interpreter](interp: I): tuple[key, message: string] =
     for field in interp.error_fields:
         yield (field.id, field.hint)
 
-proc check*[I: Interpreter](interp: I) =
+proc getErrors*[I: Interpreter](interp: I): seq[Field] =
+    ## Retrieve errors from current ``Interpreter`` instance
+    result = interp.error_fields
+
+proc check_kind[A, B: JsonNode](a: A, b: B, kind: JsonNodeKind): bool = 
+    ## Check the ``JsonNodeKind`` between `A` and `B`
+    result = a.kind == kind and b.kind == kind
+
+proc check_length[A, B: JsonNode](a: A, b: B): bool =
+    ## Check ``JsonNode`` length betwen `A` and `B`
+    result = a.len == b.len
+
+proc validate*[I: Interpreter](interp: var I) =
     ## Procedure for starting the validation
-    ## TODO
-    
+    var i = 0
+    let lenNodes = interp.nodes.len
+    while i < lenNodes:
+        if check_length(interp.nodes, interp.content):
+            interp.addError()
+        if interp.hasErrors: break
+        # echo check_kind(interp.nodes[i], interp.content[i]["user"], JObject)
+        inc i
+
+    # for node in interp.nodes.items():
+        # check(node["ident"], )
