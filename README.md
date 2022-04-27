@@ -152,12 +152,72 @@ contexts:
 
 ## REST API Endpoints
 
-
 1. <kbd>GET</kbd> <code>/</code><br>
 Returns the status of your Enkava instance followed by a `rules` object that contains current Enkava rules.
 
+Response example:
+```json
+{
+    "status": 200,
+    "sheets": [
+        {
+            "id": "contact",
+            "endpoint": "/check/contact"
+        },
+        {
+            "id": "register",
+            "endpoint": "/check/register"
+        },
+        {
+            "id": "newsletter",
+            "endpoint": "/check/newsletter"
+        }
+    ]
+}
+```
+
 2. <kbd>POST</kbd> <code>/check/{slug}</code><br>
-TODO
+
+Status types: `InternalError`, `GeneralError`, `FieldError`, `Valid`.
+
+1. `InternalError` Response:
+Enkava is safe for runtime even when dealing with internal errors.
+TOOD Explain
+
+```json
+{
+    "error_type": "InternalError",
+    "public_internal_error": "Your submission could not be processed. Try again",
+    "private_internal_error": "Could not find a sheet of rules with this name: `hello2`",
+    "private_internal_exception": "ReadIOEffect"
+}
+```
+2. `GeneralError` Response:
+TOOD Explain
+
+```json
+{
+    "error_type": "GeneralError",
+    "public_general_error": "Invalid submission. Please, try again",
+    "private_general_reason": "Validation failed on check_length"
+}
+```
+
+3. `FieldError` Response:
+TODO Explain
+
+```json
+{
+    "error_type": "FieldError",
+    "fields": [
+        {
+            "id": "email_address",
+            "hint": "Invalid email address"
+        }
+    ]
+}
+```
+
 
 
 ## Roadmap
