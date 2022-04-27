@@ -218,7 +218,10 @@ proc createNode(p: var Parser, parentNode: Node, prefixFn: PrefixFunction) =
     ## type ``seq[Node]`` from given ``parentNode``
     var nestedField = p.prefixFn()
     if nestedField != nil:
-        parentNode.nodes[nestedField.ident] = nestedField
+        let fieldId = nestedField.ident
+        if not parentNode.nodes.hasKey(fieldId):
+            parentNode.nodes[fieldId] = nestedField
+        else: p.setError(IdentError, "Duplicate identifier \"$1\"" % [fieldId])
 
 proc getLastParent(p: var Parser): Node =
     ## Retrieve the last ``Node`` parent from ``parents`` field
@@ -245,7 +248,10 @@ proc parseExpression(p: var Parser): Node =
                     break
                 subfield = p.prefixFn()
                 if subfield != nil:
-                    field.nodes[subfield.ident] = subfield
+                    let fieldId = subfield.ident
+                    if not field.nodes.hasKey(fieldId):
+                        field.nodes[fieldId] = subfield
+                    else: p.setError(IdentError, "Duplicate identifier \"$1\"" % [fieldId])
             else:
                 # Otherwise, handle multi-dimensional nests
                 if p.isChildOf(p.current, p.prevNode):
