@@ -48,6 +48,7 @@ proc runCommand*(configPath: Value) =
         quit()
 
     # Indexing all ``.bson`` files based on given ``outputDirPath``
+    # Binary JSON files are stored in a `MemoryTable` while Enkava server is running
     Memory.indexing(outputDirPath)
 
     # Start REST API microservice
