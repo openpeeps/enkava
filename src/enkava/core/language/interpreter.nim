@@ -12,48 +12,89 @@
 #          https://enkava.co
 #          https://github.com/enkava
 
-import std/[json, with]
-from std/strutils import `%`
+import std/json
+from std/os import getCurrentDir
 
 type
+    Status = enum
+        None, FieldError, GeneralError, InternalError, Valid
 
-    Field* = object
+    Field* = ref object
         id: string
             ## Identifier name of the field
         hint: string
             ## Field that can contain a hint message explaining the error
-    Status = enum
-        None, Invalid, Valid
-
-    InternalErrorNotification* = ref object
-        public_error: string
-            ## A public error message to display on client side via REST API
-        private_error: string
-            ## Holds an error message that is displayed on internal errors.
-            ## For example, parsing an invalid stringified JSON with ``parseJson``,
-            ## a bson file is missing from disk, and so on.
         private_exception: string
-            ## Holds an Exception message. For example ``JsonParsingError``
+
+    InterpreterError* = ref object
+        case error_type: Status
+            of InternalError:
+                public_internal_error: string
+                    ## A public error message to display on client side via REST API
+                private_internal_error: string
+                    ## Holds an error message that is displayed on internal errors.
+                    ## For example, parsing an invalid stringified JSON with ``parseJson``,
+                    ## a bson file is missing from disk, and so on.
+                private_internal_exception: string
+                    ## Holds an Exception message. For example ``JsonParsingError``
+            of GeneralError:
+                public_general_error: string
+                private_general_reason: string
+            of FieldError:
+                fields: seq[Field]
+                    ## A sequence representing fields that contains invalid contents
+            else: discard
 
     Interpreter* = object
         status: Status
             ## Status of current Interpreter instance
             ## It can be either ``Invalid`` or ``Valid``
+        total_errors: int8
+            ## Holds the number of total errors
+        errors: InterpreterError
+            ## Discovers parsing errors and other Nim exceptions
+            ## and store as ``InternalError``
         content: JsonNode
             ## Holds the JSON content that needs to be validated
         nodes: JsonNode
             ## Holds the Abstract Syntax Tree representation of Enkava rules
-        error_fields: seq[Field]
-            ## A sequence representing fields that contains invalid contents
-        total_errors: int8
-            ## Holds the number of total errors
-        internal_error: InternalErrorNotification
-            ## a ``ref object`` containing the following string-based fields:
-            ## ``public_error``, ``private_error`` ``and private_exception``
 
-proc addError*[I: Interpreter](interp: var I) =
+proc newInternalError*[I: Interpreter](interp: var I, public, private, exception: string) =
+    ## Set a new ``InterpreterError`` of type ``InternalError``
+    interp.status = InternalError
+    interp.errors = InterpreterError(
+        error_type: InternalError,
+        public_internal_error: public,
+        private_internal_error: private,
+        private_internal_exception: exception
+    )
+
+proc newGeneralError*[I: Interpreter](interp: var I, msg, reason: string) =
+    ## Set a new ``InterpreterError`` of type ``GeneralError`
+    interp.total_errors = 1
+    interp.status = GeneralError
+    interp.errors = InterpreterError(
+        error_type: GeneralError,
+        public_general_error: msg,
+        private_general_reason: reason
+    )
+
+proc hasErrors*[I: Interpreter](interp: I): bool =
+    ## Determine if current Interpreter has any internal or general erros
+    result = interp.total_errors != 0 and interp.errors != nil
+
+proc getErrors*[I: Interpreter](interp: I): InterpreterError =
+    ## Return ``InterpreterError`` instance, if not nil
+    result = interp.errors
+
+proc addError*[I: Interpreter](interp: var I, id, msg, exception: string) =
     ## Add a new Field to ``error_fields``
-    interp.error_fields.add(Field())
+    var field = Field(id: id, hint: msg, private_exception: exception)
+    if interp.errors != nil:
+        interp.errors.fields.add(field)
+    else:
+        interp.errors = InterpreterError(error_type: FieldError)
+        interp.errors.fields.add(field)
     inc interp.total_errors
 
 proc init*[I: typedesc[Interpreter]](interp: I, content, rules: string): Interpreter =
@@ -62,73 +103,82 @@ proc init*[I: typedesc[Interpreter]](interp: I, content, rules: string): Interpr
     try:
         let
             ekaRules: JsonNode = parseJson(rules)
-            contentBody: JsonNode = parseJson(content)
+            contentBody: JsonNode = parseJson(readFile(getCurrentDir() & "/test.json"))
         result = interp(nodes: ekaRules, content: contentBody)
     except JsonParsingError:
         var interpreter = interp()
-        with interpreter:
-            internal_error = InternalErrorNotification(
-                public_error: "Could not process your submission. Please, try again.",
-                private_error: getCurrentExceptionMsg(),
-                private_exception: $(JsonParsingError)
-            )
+        interpreter.newInternalError(
+            "Could not process your submission. Please, try again.",
+            getCurrentExceptionMsg(), $(JsonParsingError)
+        )
         result = interpreter
 
+const stringBasedSymbols = [
+    "TypeAscii", "TypeAlphabetical", "TypeBase32", "TypeBase58", "TypeBase64",
+    "TypeEmail", "TypeString"
+]
 
-proc addNotification*[I: Interpreter](interp: var I, msg: string, showTotal: bool) =
-    ## Add a general notification message that is
-    ## returned in an HTTP response when an error occurs.
-    ## 
-    ## Set ``showTotal`` true to display total errors in your
-    ## general notification message. The substitution variables
-    ## (the thing after the $) are enumerated from 1 to a.len.
-    ## 
-    ## To produce a verbatim ``$``, use ``$$``.
-    ## 
-    ## The notation ``$#`` can be used to refer to the next substitution variable
-    ## https://nim-lang.org/docs/strutils.html#%25%2Cstring%2CopenArray%5Bstring%5D
-    if showTotal: interp.notification % [interp.total_errors]
-    else: interp.notification = msg
+proc kindBySymbol(symbolName: string): JsonNodeKind =
+    if symbolName in stringBasedSymbols:
+        result = JString
+    elif symbolName == "TypeBool":
+        result = JBool
+    elif symbolName == "TypeObject":
+        result = JObject
+    elif symbolName == "TypeInt":
+        result = JInt
 
-proc hasErrors*[I: Interpreter](interp: I): bool {.inline.} = 
-    ## Determine if current Interpreter has any errors
-    result = interp.total_errors != 0
-
-proc hasInternalError*[I: Interpreter](interp: I): bool {.inline.} =
-    ## Determine if current Interpeter has any internal errors
-    result = interp.internal_error != nil
-
-proc getInternalError*[I: Interpreter](interp: I): InternalErrorNotification {.inline.} =
-    ## Returns an object of ``InternalErrorNotification``
-    result = interp.internal_error
-
-iterator errors*[I: Interpreter](interp: I): tuple[key, message: string] =
-    ## Returns a ``seq[Field]`` representing all fields with invalid contents
-    ## Iterates over ``errors`` field of current Interpreter instance
-    for field in interp.error_fields:
-        yield (field.id, field.hint)
-
-proc getErrors*[I: Interpreter](interp: I): seq[Field] =
-    ## Retrieve errors from current ``Interpreter`` instance
-    result = interp.error_fields
-
-proc check_kind[A, B: JsonNode](a: A, b: B, kind: JsonNodeKind): bool = 
+proc check_kind[A, B: JsonNode](a: A, b: B): bool = 
     ## Check the ``JsonNodeKind`` between `A` and `B`
-    result = a.kind == kind and b.kind == kind
+    result = b.kind == kindBySymbol(a["symbolName"].getStr)
 
 proc check_length[A, B: JsonNode](a: A, b: B): bool =
     ## Check ``JsonNode`` length betwen `A` and `B`
     result = a.len == b.len
 
+proc check_requirement[A, B: JsonNode](a: A, b: B): bool =
+    ## Check A has ``required`` field set to true, so
+    ## it can check B field if has any value
+    if a["required"].getBool == true:
+        result = b.getStr.len != 0
+    else: result = true
+
+proc check_name[A: JsonNode, B: string](a: A, b: B): bool =
+    result = a["ident"].getStr == b
+
+proc getFieldId(field: JsonNode): string {.inline.} =
+    result = field["ident"].getStr
+
 proc validate*[I: Interpreter](interp: var I) =
     ## Procedure for starting the validation
+
+    # General checks first
+    if not check_length(interp.nodes, interp.content):
+        interp.newGeneralError(
+            "Invalid submission. Please, try again", "Validation failed on check_length")
+        return
+
     var i = 0
     let lenNodes = interp.nodes.len
+
     while i < lenNodes:
-        if check_length(interp.nodes, interp.content):
-            interp.addError()
-        if interp.hasErrors: break
-        # echo check_kind(interp.nodes[i], interp.content[i]["user"], JObject)
+        # walks at first level only 
+        for fk, fv in pairs(interp.content[i]):
+            let rule: JsonNode = interp.nodes[i]
+            let id = rule.getFieldId
+            if not check_name(rule, fk):
+                interp.addError(id, "Field $1 does not exist" % [id], "check_name")
+                continue
+            if not check_kind(rule, fv):
+                interp.addError(id, "Field $1 expects a value of type..." % [id], "check_kind")
+                continue
+            if not check_requirement(rule, fv):
+                interp.addError(id, "Required field" % [id], "check_requirement")
+                continue
+        # if not check_kind(interp.nodes[i], interp.content[i]):
+        #     interp.newGeneralError(
+        #         "Invalid submission. Please, try again", "Validation failed on check_kind")
+        #     break
         inc i
 
     # for node in interp.nodes.items():
