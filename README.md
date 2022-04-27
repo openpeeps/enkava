@@ -1,40 +1,51 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/openpeep/parrot/main/.github/parrot-logo.png" width="170px"><br>
-    State of the Art 👌 JSON Content Rules Language, Server, Validator & Generator<br>
-    🦜 It says what you say, if you say so (WIP)
+    <!-- <img src="https://raw.githubusercontent.com/openpeep/enkava/main/.github/enkava-logo.png" width="170px"><br> -->
+    State of the Art 👌 Schema Validation Language &bullet; Built-in RESTful API<br>
+    Enkava is a top-notch language for validating JSON contents without dealing with JSON syntax at all.
 </p>
 
 <p align="center">
-    <img width="700px" alt="Parrot Language" src="https://raw.githubusercontent.com/openpeep/parrot/main/.github/sample.png">
+    <img width="700px" alt="Enkava Schema Validation Language" src="https://raw.githubusercontent.com/openpeep/enkava/main/.github/sample.png">
 </p>
 
 ## 😍 Key Features
 - [x] Lightweight & Multi-threading
-- [x] Parrot as a Language
+- [x] Enkava as a Language
 - [x] Command Line Interface
 - [x] Built-in REST API | Supporting `Http` & `WebSockets` (soon)
 - [x] 👍 for Validating damn-complex forms and data 🧐
 - [x] 💪 for Validating any kind of JSON-based configs
 - [x] Validate, validate, over and over... 😲
 - [ ] Generate rules by `JSON` sample | `Say what you say` ability
-- [x] Extension as `.parrot`
-- [x] [Parrot Syntax for Sublime Text 4](#parrot-syntax-for-your-code-editor)
+- [x] Extension as `.eka`
+- [x] [Code Syntax for Sublime Text 4](#enkava-syntax-for-your-code-editor)
+- [ ] Code Syntax for VSCode
 - [x] Made for Unix systems
 - [x] Open Source | `GPLv3` License
 
-## Why
+### Why ?
 1. Because regular JSON Schema validators are slow and boring, requires writing JSON 🙄 which is boring too.
-
-## Installing
+2. Human readable syntax like a `YAML` file:
+```enkava
+name: string
 ```
-nimble install parrot
+3. Write once, run it at any levels. `Client` <kbd>></kbd> `Application` <kbd>></kbd> `Database`.
+4. Has built-in string-based filters. For example, `email`, `ip`, `currency`, `iban`, `bitcoin`, `uppercase`, and so on.
+5. Has a built-in RESTful API.
+6. Easy to learn
+
+## Compile from Source
+Enkava is written in Nim language. If you want to compile Enkava by yourself, you'll need to
+install the latest version of Nim
+```
+nimble install enkava
 ```
 
 ## Examples
 <details>
-    <summary>Show sample Parrot Rules</summary>
+    <summary>Show sample Enkava Rules</summary>
 
-```parrot
+```enkava
 profile: object
     name: string
     age*: int                                # optional
@@ -54,10 +65,10 @@ profile: object
 
 friends: array[100, object]                # array of 100 objects, maximum
 
-    # Parrot recommends to keep it DRY (Don't Repeat Yourself)
+    # Enkava recommends to keep it DRY (Don't Repeat Yourself)
     #
     # So, instead of rewriting rules, we can use `^` same reference operator
-    # which tells Parrot that `friends` array can contain only `object` rules
+    # which tells Enkava that `friends` array can contain only `object` rules
     # similar to `profile` object. Pretty cool, right?
     ^profile
 
@@ -68,7 +79,7 @@ posts: array[object]            # simple array of (any kind) objects, no min/max
 
 </details>
 
-## Parrot Syntax for your Code editor
+## Enkava Syntax for your Code editor
 
 <details>
     <summary>Sublime Text 4 Syntax (WIP)</summary>
@@ -78,8 +89,8 @@ posts: array[object]            # simple array of (any kind) objects, no min/max
 ---
 # See http://www.sublimetext.com/docs/syntax.html
 file_extensions:
-  - parrot
-scope: source.parrot
+  - eka
+scope: source.eka
 variables:
   ident: '[A-Za-z_][A-Za-z_0-9]*'
 contexts:
@@ -87,12 +98,11 @@ contexts:
     # Strings begin and end with quotes, and use backslashes as an escape
     # character
     - match: '"'
-      scope: punctuation.definition.string.begin.parrot
+      scope: punctuation.definition.string.begin.eka
       push: double_quoted_string
-
-    # Comments begin with a '//' and finish at the end of the line
+    
     - match: '#'
-      scope: punctuation.definition.comment.parrot
+      scope: punctuation.definition.comment.eka
       push: line_comment
 
     - match: '\|'
@@ -101,15 +111,9 @@ contexts:
     - match: '\*'
       scope: entity.name.tag
 
-    # Keywords are if, else for and while.
-    # Note that blackslashes don't need to be escaped within single quoted
-    # strings in YAML. When using single quoted strings, only single quotes
-    # need to be escaped: this is done by using two single quotes next to each
-    # other.
     - match: '\b(array|bool|float|int|object|null|string)\b'
-      scope: keyword.control.parrot
+      scope: keyword.control.eka
 
-    # to document
     - match: '\b(ascii|base32|base58|base64|bic|btc|currency|date|ean|etherum|hash|hex|hexcolor|hsl)\b'
       scope: markup.italic support.constant
 
@@ -125,40 +129,49 @@ contexts:
 
     # Numbers
     - match: '\b(-)?[0-9.]+\b'
-      scope: constant.numeric.parrot
+      scope: constant.numeric.eka
 
     - match: '\b{{ident}}\b'
       scope: punctuation.definition
 
   double_quoted_string:
-    - meta_scope: string.quoted.double.parrot
+    - meta_scope: string.quoted.double.eka
     - match: '\\.'
-      scope: constant.character.escape.parrot
+      scope: constant.character.escape.eka
     - match: '"'
-      scope: punctuation.definition.string.end.parrot
+      scope: punctuation.definition.string.end.eka
       pop: true
 
   line_comment:
-    - meta_scope: comment.line.parrot
+    - meta_scope: comment.line.eka
     - match: $
       pop: true
 ```
 
 </details>
 
+## REST API Endpoints
+
+
+1. <kbd>GET</kbd> <code>/</code><br>
+Returns the status of your Enkava instance followed by a `rules` object that contains current Enkava rules.
+
+2. <kbd>POST</kbd> <code>/check/{slug}</code><br>
+TODO
+
 
 ## Roadmap
 
 ### `0.1.0`
-- [x] Lexer, Parser, AST Node 
+- [ ] Lexer, Parser, AST Node 
 - [ ] JsonNode based Validator
-- [ ] Special Validations via Parrot Filters
+- [ ] Special Validations via Enkava Filters
 - [ ] Finalize Sublime Syntax
 - [ ] Create a Syntax for VSCode (yak)
 - [ ] Talk about it on ycombinator / stackoverflow / producthunt
 
 ### ❤ Contributions
-If you like this project you can contribute to Parrot by opening new issues, fixing bugs, contribute with code, ideas and you can even [donate via PayPal address](https://www.paypal.com/donate/?hosted_button_id=RJK3ZTDWPL55C) 🥰
+If you like this project you can contribute to Enkava by opening new issues, fixing bugs, contribute with code, ideas and you can even [donate via PayPal address](https://www.paypal.com/donate/?hosted_button_id=RJK3ZTDWPL55C) 🥰
 
 ### 👑 Discover Nim language
 <strong>What's Nim?</strong> Nim is a statically typed compiled systems programming language. It combines successful concepts from mature languages like Python, Ada and Modula. [Find out more about Nim language](https://nim-lang.org/)
@@ -166,5 +179,5 @@ If you like this project you can contribute to Parrot by opening new issues, fix
 <strong>Why Nim?</strong> Performance, fast compilation and C-like freedom. We want to keep code clean, readable, concise, and close to our intention. Also a very good language to learn in 2022.
 
 ### 🎩 License
-Parrot is an Open Source Software released under `GPLv3` license. [Made by Humans from OpenPeep](https://github.com/openpeep).<br>
+Enkava is an Open Source Software released under `GPLv3` license. [Made by Humans from OpenPeep](https://github.com/openpeep).<br>
 Copyright &copy; 2022 OpenPeep & Contributors &mdash; All rights reserved.
