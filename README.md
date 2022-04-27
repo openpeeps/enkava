@@ -180,7 +180,7 @@ Response example:
 
 Status types: `InternalError`, `GeneralError`, `FieldError`, `Valid`.
 
-1. `InternalError` Response:
+1. `InternalError` Response:<br>
 Enkava is safe for runtime even when dealing with internal errors.
 TOOD Explain
 
@@ -192,7 +192,7 @@ TOOD Explain
     "private_internal_exception": "ReadIOEffect"
 }
 ```
-2. `GeneralError` Response:
+2. `GeneralError` Response:<br>
 TOOD Explain
 
 ```json
@@ -203,7 +203,7 @@ TOOD Explain
 }
 ```
 
-3. `FieldError` Response:
+3. `FieldError` Response:<br>
 TODO Explain
 
 ```json
