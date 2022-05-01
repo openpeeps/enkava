@@ -14,8 +14,7 @@
 
 import klymene/cli
 import ../core/language/parser
-import ../core/server/memory
-from ../utils import writeBson, readBson
+import ../utils
 
 from times import cpuTime
 from std/os import getCurrentDir
@@ -24,6 +23,9 @@ from klymene import Value, `$`
 
 proc runCommand*() =
     ## Command for generating binary JSON (BSON) rules for all rules
+    if not configFileExists():
+        display("👉 `$1` is missing. Run `enkava init` to generate your config." % [configFileName], indent=2)
+        quit()
     let enkavaSampleFile = getCurrentDir() & "/hello.eka"
     var p = parseProgram(enkavaSampleFile)
 
@@ -35,13 +37,9 @@ proc runCommand*() =
     
     # Save BSON representation for each Enkava rules
     let time = cpuTime()
-    # let eka_path = getCurrentDir() & "/test.bson"
-    # let bson_path = getCurrentDir() & "/test.bson"
-
-    # writeBson(p.getStatements())
-    # Memory.add("test", eka_path, bson_path)
-
-    # echo readBson(getCurrentDir() & "/test.bson")
+    echo p.getStatements()
+    
+    writeBson(p.getStatements(), getCurrentDir() & "/../example/bson/hello.bson")
     
     let benchTime = (cpuTime() - time).formatFloat(format = ffDecimal, precision = 3)
     display("✨ Done in " & $benchTime & " seconds", indent=2, br="before")

@@ -14,7 +14,6 @@
 
 import klymene
 import enkava/commands/[init, server, validator, build]
-import enkava/core/server/memory
 from std/strutils import `%`
 
 const

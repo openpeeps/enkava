@@ -16,6 +16,8 @@ import supranim
 import ./memory
 import ../language/interpreter
 
+from std/strutils import `%`
+
 type
     Status = object of RootObj
         status: HttpCode
@@ -37,6 +39,7 @@ proc getParrotStatus(req: Request, res: Response) =
     type IndexEndpoints = object
             status: HttpCode
             sheets: seq[Sheet]
+
     var index = IndexEndpoints(
         status: Http200,
         sheets: Memory.getAllSheets()
@@ -57,19 +60,32 @@ proc validateRuleById(req: Request, res: Response) =
     ## 500 Code:
     ##      If validation fails, a 500 status code will be sent with
     ##      a JSON content containing a group of invalid fields.
-    var params = req.getParams()
-    if Memory.has(params[0].str):
-        var interp = Interpreter.init("", Memory.getBSON(params[0].str))
+    ##
+    
+    # Looks like Supranim responds faster when using
+    # ``return`` instead of ``if/elif`` statements
+    var
+        interp: Interpreter
+        params = req.getParams()
+    let sheetId = params[0].str
+    if Memory.has(sheetId):
+        interp = Interpreter.init("", Memory.getBSON(sheetId))
         
-        if interp.hasInternalError:             # Catch internal errors
-            res.json(interp.getInternalError)
+        if interp.hasErrors():                  # check for ``InternalError``
+            res.json(interp.getErrors())
+            return
+        interp.validate()   # Now we can start the validation
 
-        # Validate given contents based on provided BSON sheet
-        interp.validate()
-
-        if interp.hasErrors:
+        if interp.hasErrors():                  # check for ``GeneralError`` and ``FieldError``
             res.json(interp.getErrors())
             return
         res.json("Ok")
         return
-    res.json404("Invalid")
+
+    interp = Interpreter()
+    interp.newInternalError(
+        "Your submission could not be processed. Try again",
+        "Could not find a sheet of rules with this name: `$1`" % [sheetId],
+        $(ReadIOEffect)
+    )
+    res.json_error(interp.getErrors(), Http404)

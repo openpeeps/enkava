@@ -24,11 +24,11 @@ const configFileName* = "enkava.config.yml"
 type
     EnkavaException* = CatchableError
 
-proc writeBson*(ekaStatements: string) =
+proc writeBson*(ekaStatements, bsonPath: string) =
     ## Write current JSON AST to BSON
     var eka = newBsonDocument()
     eka["ast"] = ekaStatements
-    writeFile(getCurrentDir() & "/test.bson", eka.bytes)
+    writeFile(bsonPath, eka.bytes)
 
 proc readBson*(ekaPath: string): string =
     ## Read current BSON and parse to JSON
