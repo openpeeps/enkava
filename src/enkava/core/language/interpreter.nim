@@ -153,33 +153,23 @@ proc validate*[I: Interpreter](interp: var I) =
     ## Procedure for starting the validation
 
     # General checks first
-    if not check_length(interp.nodes, interp.content):
+    if not check_length(interp.nodes, interp.content[0]):
         interp.newGeneralError(
             "Invalid submission. Please, try again", "Validation failed on check_length")
         return
 
     var i = 0
     let lenNodes = interp.nodes.len
-
-    while i < lenNodes:
-        # walks at first level only 
-        for fk, fv in pairs(interp.content[i]):
-            let rule: JsonNode = interp.nodes[i]
-            let id = rule.getFieldId
-            if not check_name(rule, fk):
-                interp.addError(id, "Field $1 does not exist" % [id], "check_name")
-                continue
-            if not check_kind(rule, fv):
-                interp.addError(id, "Field $1 expects a value of type..." % [id], "check_kind")
-                continue
-            if not check_requirement(rule, fv):
-                interp.addError(id, "Required field" % [id], "check_requirement")
-                continue
-        # if not check_kind(interp.nodes[i], interp.content[i]):
-        #     interp.newGeneralError(
-        #         "Invalid submission. Please, try again", "Validation failed on check_kind")
-        #     break
+    for fk, fv in pairs(interp.content[0]):
+        let rule: JsonNode = interp.nodes[i]
+        let id = rule.getFieldId
+        if not check_name(rule, fk):
+            interp.addError(id, "Field $1 does not exist" % [id], "check_name")
+            continue
+        if not check_kind(rule, fv):
+            interp.addError(id, "Field $1 expects a value of type..." % [id], "check_kind")
+            continue
+        if not check_requirement(rule, fv):
+            interp.addError(id, "Required field" % [id], "check_requirement")
+            continue
         inc i
-
-    # for node in interp.nodes.items():
-        # check(node["ident"], )
