@@ -20,7 +20,7 @@ from std/strutils import parseEnum
 from ./parser import TokenKind
 include ./ast
 
-import ../../filters/[email, iban, ip, str, uuid]
+import ../../filters/[email, ip, str, uuid]
 
 type
     Status = enum
@@ -178,15 +178,15 @@ proc check_string_kind[A, B: JsonNode](a: A, b: B): tuple[status: bool, hint: st
     of TypeUUID:
         result.status   = uuid.isValid input
     of TypeUUIDv1:
-        result.status   = uuid.isValid(input, UUIDv1)
+        result.status   = uuid.isValid(input, V1)
     of TypeUUIDv3:
-        result.status   = uuid.isValid(input, UUIDv3)
+        result.status   = uuid.isValid(input, V3)
     of TypeUUIDv4:
-        result.status   = uuid.isValid(input, UUIDv4)
+        result.status   = uuid.isValid(input, V4)
     of TypeUUIDv5:
-        result.status   = uuid.isValid(input, UUIDv5)
-    of TypeIBAN:
-        result.status   = iban.isValid(input)
+        result.status   = uuid.isValid(input, V5)
+    # of TypeIBAN:
+    #     result.status   = iban.isValid(input)
     else: result.status = true
 
 proc getFieldId(field: JsonNode): string {.inline.} =
