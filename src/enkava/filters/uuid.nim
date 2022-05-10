@@ -14,7 +14,11 @@
 
 from std/strutils import split, count, isAlphaAscii, toLowerAscii, Digits
 
-proc isValid*(input: string, version = 0): bool =
+type
+    UUIDVersion* = enum
+        UUID, UUIDv1, UUIDv3, UUIDv4, UUIDv5
+
+proc isValid*(input: string, version: UUIDVersion = UUID): bool =
     ## Validate given input string as UUID.
     ## This procedure covers all UUID versions.
     ## https://en.wikipedia.org/wiki/Universally_unique_identifier
@@ -26,8 +30,16 @@ proc isValid*(input: string, version = 0): bool =
     if timeLow.len != 8 or timeMid.len != 4 or timeHigh.len != 4 or
        clockSeq.len != 4 or node.len != 12: return false
     
-    # if timeHigh[0] == '1': version 1
-    # elif timeHigh[0] == '2': version 2
+    case version:
+        of UUIDv1:
+            if timeHigh[0] != '1': return false
+        of UUIDv3:
+            if timeHigh[0] != '3': return false
+        of UUIDv4:
+            if timeHigh[0] != '4': return false
+        of UUIDv5:
+            if timeHigh[0] != '5': return false
+        else: discard
 
     var alphaRange = {'a'..'f'}
     for column in [timeLow, timeMid, timeHigh, clockSeq, node]:

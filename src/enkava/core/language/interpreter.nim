@@ -20,7 +20,7 @@ from std/strutils import parseEnum
 from ./parser import TokenKind
 include ./ast
 
-import ../../filters/[email, ip, str, uuid]
+import ../../filters/[email, iban, ip, str, uuid]
 
 type
     Status = enum
@@ -122,7 +122,7 @@ proc init*[I: typedesc[Interpreter]](interp: I, content, rules: string): Interpr
 
 const stringBasedSymbols = [
     "TypeAscii", "TypeAlphabetical", "TypeBase32", "TypeBase58", "TypeBase64",
-    "TypeEmail", "TypeString", "TypeUUIDv1"
+    "TypeEmail", "TypeString", "TypeUUID", "TypeUUIDv1", "TypeUUIDv3", "TypeUUIDv4", "TypeUUIDv5"
 ]
 
 proc kindBySymbol(symbolName: string): JsonNodeKind =
@@ -178,15 +178,15 @@ proc check_string_kind[A, B: JsonNode](a: A, b: B): tuple[status: bool, hint: st
     of TypeUUID:
         result.status   = uuid.isValid input
     of TypeUUIDv1:
-        result.status   = uuid.isValid(input, 1)
-    of TypeUUIDv2:
-        result.status   = uuid.isValid(input, 2)
+        result.status   = uuid.isValid(input, UUIDv1)
     of TypeUUIDv3:
-        result.status   = uuid.isValid(input, 3)
+        result.status   = uuid.isValid(input, UUIDv3)
     of TypeUUIDv4:
-        result.status   = uuid.isValid(input, 4)
+        result.status   = uuid.isValid(input, UUIDv4)
     of TypeUUIDv5:
-        result.status   = uuid.isValid(input, 5)
+        result.status   = uuid.isValid(input, UUIDv5)
+    of TypeIBAN:
+        result.status   = iban.isValid(input)
     else: result.status = true
 
 proc getFieldId(field: JsonNode): string {.inline.} =
