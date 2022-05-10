@@ -13,13 +13,14 @@
 #          https://github.com/enkava
 
 import std/json
+import jsony
 from std/os import getCurrentDir
 from std/strutils import parseEnum
 
 from ./parser import TokenKind
 include ./ast
 
-import ../../filters/[email, ip, str]
+import ../../filters/[email, ip, str, uuid]
 
 type
     Status = enum
@@ -121,7 +122,7 @@ proc init*[I: typedesc[Interpreter]](interp: I, content, rules: string): Interpr
 
 const stringBasedSymbols = [
     "TypeAscii", "TypeAlphabetical", "TypeBase32", "TypeBase58", "TypeBase64",
-    "TypeEmail", "TypeString"
+    "TypeEmail", "TypeString", "TypeUUIDv1"
 ]
 
 proc kindBySymbol(symbolName: string): JsonNodeKind =
@@ -174,6 +175,18 @@ proc check_string_kind[A, B: JsonNode](a: A, b: B): tuple[status: bool, hint: st
         result.status   = str.isUppercase input
     of TypeDigit:
         result.status   = str.isDigits input
+    of TypeUUID:
+        result.status   = uuid.isValid input
+    of TypeUUIDv1:
+        result.status   = uuid.isValid(input, 1)
+    of TypeUUIDv2:
+        result.status   = uuid.isValid(input, 2)
+    of TypeUUIDv3:
+        result.status   = uuid.isValid(input, 3)
+    of TypeUUIDv4:
+        result.status   = uuid.isValid(input, 4)
+    of TypeUUIDv5:
+        result.status   = uuid.isValid(input, 5)
     else: result.status = true
 
 proc getFieldId(field: JsonNode): string {.inline.} =

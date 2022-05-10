@@ -19,14 +19,13 @@ const validTLDs = GetTLDs
 
 proc isValid*(input: string): bool =
     ## Validates a domain name including Top-Level-Domain.
-    if input.count(".") == 0:
+    if input.count(".") != 1:
         return false
     var
         i = 0
         domainName: string
         tld: string
-    
-    if input.count(".") != 1: return false
+
     (domainName, tld) = input.split(".")
 
     let

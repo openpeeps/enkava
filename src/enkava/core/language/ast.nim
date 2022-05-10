@@ -48,6 +48,14 @@ type
         TypeNumerical
         TypeURL
         TypeUppercase
+        
+        TypeUUID
+        TypeUUIDv1
+        TypeUUIDv2
+        TypeUUIDv3
+        TypeUUIDv4
+        TypeUUIDv5
+
         TypeArray
         TypeBool
         TypeFloat
@@ -108,6 +116,12 @@ proc typeValueByKind*(kind: TokenKind): EnkavaTypeValue =
         of TK_MD5:             TypeMD5
         of TK_NUMERICAL:       TypeNumerical
         of TK_URL:             TypeURL
+        of TK_UUID:            TypeUUID
+        of TK_UUID_V1:         TypeUUIDv1
+        of TK_UUID_V2:         TypeUUIDv2
+        of TK_UUID_V3:         TypeUUIDv3
+        of TK_UUID_V4:         TypeUUIDv4
+        of TK_UUID_V5:         TypeUUIDv5
         of TK_UPPERCASE:       TypeUppercase
         of TK_TYPE_ARRAY:      TypeArray
         of TK_TYPE_BOOL:       TypeBool

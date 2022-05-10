@@ -61,6 +61,12 @@ tokens:
     Numerical       > "numerical"
     URL             > "url"
     Uppercase       > "uppercase"
+    Uuid            > "uuid"
+    Uuid_v1         > "uuidv1"
+    Uuid_v2         > "uuidv2"
+    Uuid_v3         > "uuidv3"
+    Uuid_v4         > "uuidv4"
+    Uuid_v5         > "uuidv5"
 
     # Base type
     Type_Array       > "array"
