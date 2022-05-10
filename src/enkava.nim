@@ -40,3 +40,16 @@ if   isCommand("new", args):                init.runCommand()
 elif isCommand("serve", args):              server.runCommand(args["<config>"])
 elif isCommand("check", args):              validator.runCommand(args["<json>"], args["<rules>"])
 elif isCommand("build", args):              build.runCommand()
+
+
+#
+# CLI implementation based on Klymene v2
+#
+# about:
+#     "Enkava Validation Schema Language"
+#     "Made by Humans from OpenPeep 👉 https://github.com/openpeep/enkava"
+# commands:
+#     $ "new"                             "Create a new Enkava config file"
+#     $ "build"                           "Generate Binary AST for all Enkava rules"
+#     $ "serve" ["config"]                "Run Enkava as a REST API microservice"
+#     $ "check" ["json", "rules"]         "Validate JSON contents with given rules"

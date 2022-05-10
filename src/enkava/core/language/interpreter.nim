@@ -14,6 +14,12 @@
 
 import std/json
 from std/os import getCurrentDir
+from std/strutils import parseEnum
+
+from ./parser import TokenKind
+include ./ast
+
+import ../../filters/[email, ip, str]
 
 type
     Status = enum
@@ -128,9 +134,12 @@ proc kindBySymbol(symbolName: string): JsonNodeKind =
     elif symbolName == "TypeInt":
         result = JInt
 
+proc getKind(a: JsonNode): string {.inline.} =
+    result = a["symbolName"].getStr
+
 proc check_kind[A, B: JsonNode](a: A, b: B): bool = 
     ## Check the ``JsonNodeKind`` between `A` and `B`
-    result = b.kind == kindBySymbol(a["symbolName"].getStr)
+    result = b.kind == kindBySymbol(a.getKind)
 
 proc check_length[A, B: JsonNode](a: A, b: B): bool =
     ## Check ``JsonNode`` length betwen `A` and `B`
@@ -144,16 +153,37 @@ proc check_requirement[A, B: JsonNode](a: A, b: B): bool =
     else: result = true
 
 proc check_name[A: JsonNode, B: string](a: A, b: B): bool =
+    ## Check if a field exists based on its name key
     result = a["ident"].getStr == b
 
+proc check_string_kind[A, B: JsonNode](a: A, b: B): tuple[status: bool, hint: string] = 
+    ## Main procedure that validates a string-based inputs
+    ## depending on their ``EnkavaTypeValue``.
+    let kind = parseEnum[EnkavaTypeValue](a.getKind)
+    let input = b.getStr
+    case kind:
+    of TypeEmail:
+        result.status   = email.isValid input
+    of TypeIP:
+        result.status   = ip.isIPv4 input
+    of TypeAlphabetical:
+        result.status   = str.isAlpha input
+    of TypeLowercase:
+        result.status   = str.isLowercase input
+    of TypeUppercase:
+        result.status   = str.isUppercase input
+    of TypeDigit:
+        result.status   = str.isDigits input
+    else: result.status = true
+
 proc getFieldId(field: JsonNode): string {.inline.} =
+    ## Returns a stringified identifier key of the field
     result = field["ident"].getStr
 
 proc validate*[I: Interpreter](interp: var I) =
     ## Procedure for starting the validation
-
-    # General checks first
     if not check_length(interp.nodes, interp.content[0]):
+        # General checks first
         interp.newGeneralError(
             "Invalid submission. Please, try again", "Validation failed on check_length")
         return
@@ -162,6 +192,7 @@ proc validate*[I: Interpreter](interp: var I) =
     let lenNodes = interp.nodes.len
     for fk, fv in pairs(interp.content[0]):
         let rule: JsonNode = interp.nodes[i]
+        inc i
         let id = rule.getFieldId
         if not check_name(rule, fk):
             interp.addError(id, "Field $1 does not exist" % [id], "check_name")
@@ -169,7 +200,17 @@ proc validate*[I: Interpreter](interp: var I) =
         if not check_kind(rule, fv):
             interp.addError(id, "Field $1 expects a value of type..." % [id], "check_kind")
             continue
+        
         if not check_requirement(rule, fv):
+            # When required, checks if current field is filled
             interp.addError(id, "Required field" % [id], "check_requirement")
             continue
-        inc i
+
+        let stringKind = check_string_kind(rule, fv)
+        if stringKind.status == false:
+            # When field is based on a string filter, will validate given input.
+            # This verification incldues many string-based filters. Check ``EnkavaTypeValue``
+            # from ``ast`` file.
+            interp.addError(id, "Field is not valid", "check_string_kind")
+            continue
+        
