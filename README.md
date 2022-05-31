@@ -16,16 +16,16 @@
 - [x] 👍 for Validating damn-complex forms and data 🧐
 - [x] 💪 for Validating any kind of JSON-based configs
 - [x] Validate, validate, over and over... 😲
-- [ ] Generate rules by `JSON` sample | `Say what you say` ability
+- [ ] Generate rules by `JSON` sample
 - [x] Extension as `.eka`
 - [x] [Code Syntax for Sublime Text 4](#enkava-syntax-for-your-code-editor)
-- [ ] Code Syntax for VSCode
+- [ ] Code Syntax for VSCode (Need help!)
 - [x] Made for Unix systems
 - [x] Open Source | `GPLv3` License
 
 ### Why ?
 1. Because regular JSON Schema validators are slow and boring, requires writing JSON 🙄 which is boring too.
-2. Human readable syntax like a `YAML` file:
+2. Human readable, `YAML` like syntax:
 ```enkava
 name: string
 ```
@@ -33,13 +33,16 @@ name: string
 4. Has built-in string-based filters. For example, `email`, `ip`, `currency`, `iban`, `bitcoin`, `uppercase`, and so on.
 5. Has a built-in RESTful API.
 6. Easy to learn
+7. Can be used to build cool things like Quizzes, Q&A and so on.
 
 ## Compile from Source
-Enkava is written in Nim language. If you want to compile Enkava by yourself, you'll need to
+Enkava is written in Nim language. If you want to compile Enkava by yourself first you'll need to
 install the latest version of Nim
 ```
 nimble install enkava
 ```
+
+Installing from Nimble will also compile enkava at the same time. So, that's all!
 
 ## Examples
 <details>
