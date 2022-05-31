@@ -12,7 +12,7 @@
 #          https://enkava.co
 #          https://github.com/enkava
 
-import supranim
+import supranim/response
 import ./memory
 import ../language/interpreter
 
@@ -82,6 +82,8 @@ proc validateRuleById(req: Request, res: Response) =
         res.json("Ok")
         return
 
+    # Otherwise, initialize Interpreter and
+    # returns an Internal Error response
     interp = Interpreter()
     interp.newInternalError(
         "Your submission could not be processed. Try again",

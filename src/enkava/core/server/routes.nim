@@ -22,6 +22,6 @@ Router.get("/", getParrotStatus)
 # POST type endpoint to validate JSON contents
 # 
 # Your request must contain the following parameters
-#   slug     Which is the name of a binary JSON compiled by Enkava
-#   body     Must contain only JSON contents that must be validated 
+#   slug     Which is the name of a BSON sheet compiled with Enkava
+#   body     Only JSON contents that must be validated 
 Router.get("/check/{slug}", validateRuleById)
