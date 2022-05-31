@@ -57,7 +57,7 @@ proc isValid*(input: string, allowSpecialChars = false): bool =
     while i < userLen:
         if i != 0:                       prev = usernameInput[i - 1]
         if i + 1 >= userLen == false:    next = usernameInput[i + 1]
-        else: next = ' '
+        # else: next = ' '
         if usernameInput[i] in Whitespace:
             return false
         if usernameInput[i] in specialChars:
