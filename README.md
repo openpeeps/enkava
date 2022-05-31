@@ -36,17 +36,13 @@ name: string
 7. Can be used to build cool things like Quizzes, Q&A and so on.
 
 ## Compile from Source
-Enkava is written in Nim language. If you want to compile Enkava by yourself first you'll need to
-install the latest version of Nim
 ```
 nimble install enkava
 ```
 
-Installing from Nimble will also compile enkava at the same time. So, that's all!
-
 ## Examples
 <details>
-    <summary>Show sample Enkava Rules</summary>
+    <summary>This is how .eka rules looks like</summary>
 
 ```enkava
 profile: object
@@ -76,8 +72,6 @@ friends: array[100, object]                # array of 100 objects, maximum
     ^profile
 
 posts: array[object]            # simple array of (any kind) objects, no min/max
-
-# Yeah. This is a comment
 ```
 
 </details>
