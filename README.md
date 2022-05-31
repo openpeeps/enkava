@@ -244,3 +244,5 @@ If you like this project you can contribute to Enkava by opening new issues, fix
 ### 🎩 License
 Enkava is an Open Source Software released under `GPLv3` license. [Made by Humans from OpenPeep](https://github.com/openpeep).<br>
 Copyright &copy; 2022 OpenPeep & Contributors &mdash; All rights reserved.
+
+<a href="https://hetzner.cloud/?ref=Hm0mYGM9NxZ4"><img src="https://openpeep.ro/banners/openpeep-footer.png" width="100%"></a>
