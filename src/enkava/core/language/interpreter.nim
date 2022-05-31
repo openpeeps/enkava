@@ -112,13 +112,12 @@ proc init*[I: typedesc[Interpreter]](interp: I, content, rules: string): Interpr
             ekaRules: JsonNode = parseJson(rules)
             contentBody: JsonNode = parseJson(readFile(getCurrentDir() & "/test.json"))
         result = interp(nodes: ekaRules, content: contentBody)
-    except JsonParsingError:
-        var interpreter = interp()
-        interpreter.newInternalError(
+    except:
+        result = interp()
+        result.newInternalError(
             "Could not process your submission. Please, try again.",
-            getCurrentExceptionMsg(), $(JsonParsingError)
+            getCurrentExceptionMsg(), $(ReadIOEffect)
         )
-        result = interpreter
 
 const stringBasedSymbols = [
     "TypeAscii", "TypeAlphabetical", "TypeBase32", "TypeBase58", "TypeBase64",

@@ -13,7 +13,7 @@
 #          https://github.com/enkava
 
 from std/math import splitDecimal
-from std/strutils import `%`, join
+from std/strutils import `%`, join, parseInt
 from std/sequtils import delete
 
 import toktok
@@ -28,6 +28,8 @@ tokens:
     Range       > ".."                      # Create ranges, from x to y. This works for int and char
     Lpar        > '('
     Rpar        > ')'
+    Lspar       > '['
+    Rspar       > ']'
     Colon       > ':'
     Comma       > ','
     Comment     > '#' .. EOL                # anything starting with `#` to EndOfLine is a comment
@@ -117,6 +119,35 @@ proc getError*[T: Parser](p: var T): string {.inline.} =
 
 include ./parseutils
 
+let typesWithAttributes = {TK_TYPE_ARRAY, TK_TYPE_STRING, TK_TYPE_OBJECT}
+
+template parseSquareAttributes(p: var Parser, node: var Node, typeToken: TokenKind): untyped =
+    ## Parse attributes for types. For example, for a string we have
+    ## string[10, 20] (min/max)
+    if typeToken notin typesWithAttributes:
+        p.setError(TypeError, "Current type does not support attributes")
+        return
+    jump p # [
+    case typeToken:
+        of TK_TYPE_STRING:
+            if p.current.kind == TK_INTEGER:
+                let max = parseInt(p.current.value)
+                node.size = new SizeRule
+                if p.next.kind == TK_RSPAR:
+                    node.size.min = 0
+                    node.size.max = max
+                else:
+                    jump p # ,
+                    node.size.min = parseInt(p.current.value)
+                    node.size.max = max
+        else: discard
+
+
+template parseDefaultValue(p: var Parser) = 
+    ## A template to parse default values like string|"Hello".
+    ## Raise exception if given type does not support a default value.
+    discard
+
 proc parseIdent(p: var Parser): Node =
     if p.isDuplicated(p.current,
         "Duplicate identifier \"$1\"" % [p.current.value], IdentError): return
@@ -133,7 +164,7 @@ proc parseIdent(p: var Parser): Node =
             p.setError(TypeError, "Bad indentation. Current rules document has a $1 spaces indentation" % [$p.indent])
             return
 
-    var node = Node()
+    var node = new Node
     let ident = p.current
     if p.next.kind == TK_OPTIONAL:
         jump p
@@ -141,7 +172,8 @@ proc parseIdent(p: var Parser): Node =
     else: node.required = true
     jump p, 2
 
-    let typeValue = typeValueByKind(p.current.kind)
+    let typeToken = p.current.kind
+    let typeValue = typeValueByKind(typeToken)
     if typeValue == TypeInvalid:
         p.setError(TypeError, "Invalid type for \"$1\" field" % [ident.value])
         return
@@ -153,8 +185,10 @@ proc parseIdent(p: var Parser): Node =
     p.memorize(getIdentHash ident, node)            # store in memory
     p.prevNode = node                               # make current Rule as previous
     node.meta = (kind: ident.kind, line: ident.line, col: ident.col, wsno: ident.wsno, level: p.depth)
+    if p.next.kind == TK_LSPAR:
+        jump p
+        p.parseSquareAttributes(node, typeToken)
     result = node
-    jump p
 
 template parseSameStatement[T: Parser](p: var T): untyped =
     ## When identifier is prefixed by ^ TK_SAME, it means is a
@@ -249,7 +283,7 @@ proc parseExpression(p: var Parser): Node =
             if p.isChildOf(p.current, field):
                 # Check if current token is nested at the 1st level
                 if not field.isObject():
-                    p.setError(TypeError, "\"$1\" cannot contain nested fields because is not an object" % [field.ident])
+                    p.setError(TypeError, "Invalid nest for non-object field \"$1\"" % [field.ident])
                     break
                 subfield = p.prefixFn()
                 if subfield != nil:
@@ -261,7 +295,7 @@ proc parseExpression(p: var Parser): Node =
                 # Otherwise, handle multi-dimensional nests
                 if p.isChildOf(p.current, p.prevNode):
                     if not p.prevNode.isObject():
-                        p.setError(TypeError, "\"$1\" cannot contain nested fields because is not an object" % [p.prevNode.ident])
+                        p.setError(TypeError, "Invalid nest for non-object field \"$1\"" % [p.prevNode.ident])
                         break
                     p.parents.add(p.prevNode)
                     p.createNode(p.prevNode, prefixFn)
