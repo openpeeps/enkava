@@ -12,7 +12,7 @@
 #          https://enkava.co
 #          https://github.com/enkava
 
-import supranim/response
+import supranim/controller
 import ./memory
 import ../language/interpreter
 
@@ -31,7 +31,7 @@ type
     InvalidStatus = object of Status
         fields: seq[Field]
 
-proc getParrotStatus(req: Request, res: Response) =
+proc getHomepage*(req: Request, res: var Response) =
     ## ``GET`` procedure called on ``/`` endpoint.
     ## This returns a list with all binary eka rules
     ## ``GET`` procedure that returns your Enkava instance
@@ -45,9 +45,9 @@ proc getParrotStatus(req: Request, res: Response) =
         sheets: Memory.getAllSheets()
     )
 
-    res.json(index)
+    res.json("a")
 
-proc validateRuleById(req: Request, res: Response) =
+proc validateRuleById(req: Request, res: var Response) =
     ## ``POST`` procedure called on ``/validate/{id}`` endpoint.
     ## Use this procedure to validate a JSON based on given ID.
     ##

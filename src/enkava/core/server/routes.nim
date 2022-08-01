@@ -11,17 +11,16 @@
 #          
 #          https://enkava.co
 #          https://github.com/enkava
-
 import supranim/router
 include ./pages
 
 # GET type endpoint that returns the status of your
 # Enkava instance
-Router.get("/", getParrotStatus)
+Router.get("/")
 
 # POST type endpoint to validate JSON contents
 # 
 # Your request must contain the following parameters
 #   slug     Which is the name of a BSON sheet compiled with Enkava
 #   body     Only JSON contents that must be validated 
-Router.get("/check/{slug}", validateRuleById)
+# Router.get("/check/{slug}", validateRuleById)

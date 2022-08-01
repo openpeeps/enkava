@@ -13,14 +13,13 @@
 #          https://github.com/enkava
 
 import std/json
-import jsony
 from std/os import getCurrentDir
 from std/strutils import parseEnum
 
 from ./parser import TokenKind
 include ./ast
 
-import ../../filters/[email, ip, str, uuid]
+import ../../filters/[base32, email, ip, str, uuid]
 
 type
     Status = enum
@@ -162,6 +161,8 @@ proc check_string_kind[A, B: JsonNode](a: A, b: B): tuple[status: bool, hint: st
     let kind = parseEnum[EnkavaTypeValue](a.getKind)
     let input = b.getStr
     case kind:
+    of TypeBase32:
+        result.status   = base32.isValid input
     of TypeEmail:
         result.status   = email.isValid input
     of TypeIP:
