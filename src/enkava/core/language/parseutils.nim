@@ -54,7 +54,7 @@ proc isIdent[T: Parser](p: var T, message: string): bool =
         p.setError(IdentError, message)
 
 proc isHeadline[T: Parser](p: var T): bool =
-    result = p.current.col == 0
+    result = p.current.pos == 0
 
 proc isEOF[T: Parser](p: var T): bool =
     result = p.current.kind == TK_EOF
@@ -65,7 +65,7 @@ proc isComment[T: Parser](p: var T): bool =
 proc getIdentHash(token: TokenTuple): string =
     ## Create a hash key of the identifier for storing in memory table.
     ## Result is a simple md5 hash generated based on token line, col and value
-    result = getMD5("$1:$2:$3" % [$token.line, $token.col, token.value])
+    result = getMD5("$1:$2:$3" % [$token.line, $token.pos, token.value])
 
 proc memorize[T: Parser](p: var T, key: string, node: var Node) =
     ## Store given Rule object in memory
@@ -114,12 +114,14 @@ proc isChildOf[P: Parser, T: TokenTuple](p: var P, token: T, prevNode: Node): bo
     if prevNode == nil:
         result = false
     else:
-        result = (token.col and 1) != 1 and (prevNode.meta.col and 1) != 1
+        result = (token.pos and 1) != 1 and (prevNode.meta.pos and 1) != 1
         if result == false:
             p.setError(TypeError, "Bad indentation. Use 2 or 4 spaces to indent your rules")
             return false
-        if p.indent == 0: # first time indentation will set the default indent size preference.
-            p.indent = token.col
-        if prevNode.meta.col == (token.col - 2) or
-           prevNode.meta.col == (token.col - 4): result = true
+        if p.indent == 0:
+            # first indentation will set the default
+            # indent size for the entire document
+            p.indent = token.pos
+        if prevNode.meta.pos == (token.pos - 2) or
+           prevNode.meta.pos == (token.pos - 4): result = true
         else: result = false

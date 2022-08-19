@@ -24,8 +24,8 @@ tokens:
     Same        > '^'                       # Enkava DRY feature to reference a field or a group of fields
     Exclude     > '!'                       # Used for when referencing a group of fields but want to ignore some fields
     Or          > '|'                       # Optionally, a default value for given field
-    Dot         > '.'
-    Range       > ".."                      # Create ranges, from x to y. This works for int and char
+    Dot         > '.':
+        Range   ? '.'
     Lpar        > '('
     Rpar        > ')'
     Lspar       > '['
@@ -107,7 +107,7 @@ type
 
 proc setError[T: Parser](p: var T, typeError: Error, msg: string) =
     ## Set an error message containing TypeError, line, column and the message
-    p.error = "$1 ($2:$3): $4" % [$typeError, $p.current.line, $p.current.col, msg]
+    p.error = "$1 ($2:$3): $4" % [$typeError, $p.current.line, $p.current.pos, msg]
 
 proc hasError*[T: Parser](p: var T): bool {.inline.} =
     ## Determine if there are any errors
@@ -154,12 +154,12 @@ proc parseIdent(p: var Parser): Node =
     elif not p.expect(p.next, {TK_OPTIONAL, TK_COLON},
         "Missing assignment token", TypeError): return
 
-    if p.current.col != 0:
+    if p.current.pos != 0:
         if p.indent == 0: # first time, set the indent based on first indented line
-            if p.current.col in [2, 4]:
-                p.indent = p.current.col
+            if p.current.pos in [2, 4]:
+                p.indent = p.current.pos
 
-        let indentTuple = splitDecimal(p.current.col / p.indent)
+        let indentTuple = splitDecimal(p.current.pos / p.indent)
         if indentTuple.floatpart != 0:
             p.setError(TypeError, "Bad indentation. Current rules document has a $1 spaces indentation" % [$p.indent])
             return
@@ -177,6 +177,7 @@ proc parseIdent(p: var Parser): Node =
     if typeValue == TypeInvalid:
         p.setError(TypeError, "Invalid type for \"$1\" field" % [ident.value])
         return
+    jump p
     
     node.ident = ident.value
     node.typeValue = typeValue
@@ -184,13 +185,13 @@ proc parseIdent(p: var Parser): Node =
 
     p.memorize(getIdentHash ident, node)            # store in memory
     p.prevNode = node                               # make current Rule as previous
-    node.meta = (kind: ident.kind, line: ident.line, col: ident.col, wsno: ident.wsno, level: p.depth)
+    node.meta = (kind: ident.kind, line: ident.line, pos: ident.pos, wsno: ident.wsno, level: p.depth)
     if p.next.kind == TK_LSPAR:
         jump p
         p.parseSquareAttributes(node, typeToken)
     result = node
 
-template parseSameStatement[T: Parser](p: var T): untyped =
+template parseSameStatement(p: var Parser): untyped =
     ## When identifier is prefixed by ^ TK_SAME, it means is a
     ## previously declared identifier used as reference for copying its
     ## children nodes and structure to current identifier. Pretty dope!
@@ -201,7 +202,6 @@ template parseSameStatement[T: Parser](p: var T): untyped =
         "Pointing \"same\" reference to non existing identifier \"$1\"" % [p.next.value], IdentError):
         return
     jump p
-
     let sameRefKey = p.current.value
     let sameRefNode = p.getRule(sameRefKey)
     
@@ -237,7 +237,7 @@ template parseSameStatement[T: Parser](p: var T): untyped =
                 return
 
 template ensureIndent[P: Parser](p: var P): untyped =
-    if (p.current.col and 1) != 1:
+    if (p.current.pos and 1) != 1:
         p.setError(TypeError, "Invalid indentation. Use 2 or 4 spaces to indent your rules")
 
 proc getPrefixFn(p: var Parser): PrefixFunction =
@@ -299,19 +299,20 @@ proc parseExpression(p: var Parser): Node =
                         break
                     p.parents.add(p.prevNode)
                     p.createNode(p.prevNode, prefixFn)
-                elif p.current.col < p.prevNode.meta.col or p.isEOF:
+                elif p.current.pos < p.prevNode.meta.pos or p.isEOF:
                     break
-                elif p.current.col == p.prevNode.meta.col:
+                elif p.current.pos == p.prevNode.meta.pos:
                     if p.parents.len != 0:
                         p.createNode(p.getLastParent(), prefixFn)
                         p.parents.delete(p.parents.high .. p.parents.high)
                     else: break
+
     result = field
 
 proc walk[T: Parser](p: var T) =
     ## Start walk for parsing tokens
     while p.hasError() == false and p.lexer.hasError == false and not p.isEOF:
-        if p.isComment(): p.jumpAndContinue()       # skip comments
+        if p.isComment(): p.jumpAndContinue()           # skip comments
         var statement: Node = p.parseExpression()
         if statement != nil:
             p.statements.add(statement)
@@ -325,11 +326,11 @@ proc getStatements*(p: var Parser): string =
     ## statements to pretty ``JSON``, indented with 2 spaces.
     pretty(p.statements.toJSON, 2)
 
-proc parseProgram*(enkavaContents: string): Parser =
+proc parseProgram*(contents: string): Parser =
     ## Parser Program initializer. Reads rules of the given Enkava file
     ## This procedure is highly recommended for validation large JsonNode objects
     ## that involves creating complex rules.
-    var p: Parser = Parser(lexer: Lexer.init(readFile(enkavaContents)))
+    var p: Parser = Parser(lexer: Lexer.init readFile(contents))
     p.current = p.lexer.getToken()
     p.next    = p.lexer.getToken()
     p.prev    = p.current

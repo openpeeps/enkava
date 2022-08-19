@@ -81,7 +81,7 @@ type
         nodes*: OrderedTable[string, Node]
             ## An ordered table holding multi dimensional nodes
             ## based on the rules indentations
-        meta*: tuple[kind: TokenKind, line, col, wsno, level: int]
+        meta*: tuple[kind: TokenKind, line, pos, wsno, level: int]
 
 proc isObject*(node: Node): bool =
     result = node.typeValue == TypeObject
