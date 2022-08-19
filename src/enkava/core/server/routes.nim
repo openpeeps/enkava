@@ -14,11 +14,12 @@
 import supranim/router
 include ./pages
 
+# GET endpoint to retrieve the app status
 Router.get("/")
 
-# POST type endpoint to validate JSON contents
+# POST endpoint to validate JSON contents
 # 
 # Your request must contain the following parameters
 #   slug     Which is the name of a BSON sheet compiled with Enkava
 #   body     Only JSON contents that must be validated 
-# Router.get("/check/{slug}", validateRuleById)
+Router.get("/check/{slug}", validateRuleById)

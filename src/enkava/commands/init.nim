@@ -19,15 +19,10 @@ import ../utils
 proc createConfigFile(fields: varargs[string]) =
     let enkavaConfig = """
 app:
-  # The address | 127.0.0.1
-  address: "$1"
-  # Port number | 7550
   port: $2
-  # Number of threads
+  address: "$1"
   threads: $3
-  # Source path to your .eka rules
   source: "$4"
-  # Source path to binary rules
   output: "$5"
 """
     try:

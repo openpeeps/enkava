@@ -66,8 +66,8 @@ proc validateRuleById(req: Request, res: var Response) =
     # ``return`` instead of ``if/elif`` statements
     var
         interp: Interpreter
-        params = req.getFields()
-    let sheetId = params[0][0]
+        params = req.getParams()
+    let sheetId = params[0].str
     if Memory.has(sheetId):
         interp = Interpreter.init("", Memory.getBSON(sheetId))
         

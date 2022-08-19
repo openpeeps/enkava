@@ -13,7 +13,7 @@
 #          https://github.com/enkava
 
 import klymene
-import enkava/commands/[init, server, validator, build]
+import enkava/commands/[init, server, build]
 from std/strutils import `%`
 
 const
@@ -27,7 +27,6 @@ $2
   $1 new                            # Create a new config file #
   $1 build                          # Generate Binary AST for all Enkava rules #
   $1 serve [<config>]               # Enkava as a REST API Microservice #
-  $1 check <json> <rules>           # Validate a JSON file with given rules file #
 
 $3
   -h --help             # Show this screen. #
@@ -38,7 +37,6 @@ let args = newCommandLine(commands, version=version, binaryName=appId)
 
 if   isCommand("new", args):                init.runCommand()
 elif isCommand("serve", args):              server.runCommand(args["<config>"])
-elif isCommand("check", args):              validator.runCommand(args["<json>"], args["<rules>"])
 elif isCommand("build", args):              build.runCommand()
 
 
