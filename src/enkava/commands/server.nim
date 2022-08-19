@@ -13,30 +13,28 @@
 #          https://github.com/enkava
 
 import std/json
-import supranim, klymene/cli
+import klymene/cli, supranim
+
 from klymene import Value, `$`, isNil
 from std/strutils import join, `%`
 
+init(App, autoIncludeRoutes = false)
 include ../core/server/routes
+
 import ../core/server/memory
 import ../utils
 
 proc runCommand*(configPath: Value) =
-    ## Command for starting a Enkava HTTP server powered by Supranim.
-    ##
-    ## In production mode is recommended to boot your Enkava instance(s)
-    ## by passing an absolute path that points to your specific ``enkava.config.yml``.
-    ## 
-    ## Also, you may want to boot Enkava as a daemon via
-    ## ``systemd`` or a similar daemon manager.
+    ## Command for starting the HTTP server.
     if not configFileExists():
         display("👉 `$1` is missing. Run `enkava init` to generate your config." % [configFileName], indent=2)
         quit()
     let getConfigPath = if configPath.isNil(): "" else: $configPath
+
+    # app = init(inlineConfigStr = readConfigContents(getConfigPath))
     var
-        app = supranim.init(inlineConfigStr = readConfigContents(getConfigPath))
-        srcDirPath = getDirPath(app.getConfig("app.source").getStr)
-        outputDirPath = getDirPath(app.getConfig("app.output").getStr)
+        srcDirPath = getDirPath("../example/rules")
+        outputDirPath = getDirPath("../example/bson")
         dirErrors: seq[string]
     
     for enkavaDir in [srcDirPath, outputDirPath]:
@@ -52,4 +50,4 @@ proc runCommand*(configPath: Value) =
     Memory.indexing(outputDirPath)
 
     # Start REST API microservice
-    app.start()
+    App.start()

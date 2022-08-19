@@ -14,8 +14,6 @@
 import supranim/router
 include ./pages
 
-# GET type endpoint that returns the status of your
-# Enkava instance
 Router.get("/")
 
 # POST type endpoint to validate JSON contents

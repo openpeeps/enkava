@@ -45,7 +45,7 @@ proc getHomepage*(req: Request, res: var Response) =
         sheets: Memory.getAllSheets()
     )
 
-    res.json("a")
+    res.json(index)
 
 proc validateRuleById(req: Request, res: var Response) =
     ## ``POST`` procedure called on ``/validate/{id}`` endpoint.
@@ -66,8 +66,8 @@ proc validateRuleById(req: Request, res: var Response) =
     # ``return`` instead of ``if/elif`` statements
     var
         interp: Interpreter
-        params = req.getParams()
-    let sheetId = params[0].str
+        params = req.getFields()
+    let sheetId = params[0][0]
     if Memory.has(sheetId):
         interp = Interpreter.init("", Memory.getBSON(sheetId))
         
